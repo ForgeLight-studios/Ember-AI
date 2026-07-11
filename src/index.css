@@ -475,18 +475,34 @@ header > h1 {
 }
 
 .model-list__container {
+    overflow: scroll;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     width: calc(100% - 20px);
     padding: 10px;
 }
 
 .model-list__item {
-
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
+.model-list__description {
+    border-radius: 10px;
+    background-color: var(--neutral);
+    padding: 10px;
+    width: calc(100% - 20px);
+}
+
+.model-list__name {
+    width: fit-content;
+    font-weight: bold;
+    margin: 0;
+}
 
 
 /* Dark Mode Specific Adjustments */
@@ -512,7 +528,7 @@ header > h1 {
     border: 1px solid var(--dm-border-color);
 }
 
-.dark-mode .menu-title:hover {
+.dark-mode .menu-title:hover, .dark-mode .model-list__description {
     background-color: var(--dm-neutral);
 }
 

@@ -3,6 +3,12 @@ import ModelList from "./ModelList.jsx";
 
 export default function Models() {
 
+    const [models, setModels] = useState([
+        {
+            name: "llama3.2",
+            description: "general chatting"
+        }
+    ]);
     const [addModel, setAddModel] = useState("");
     const [addModelDescription, setAddModelDescription] = useState("");
 
@@ -12,10 +18,15 @@ export default function Models() {
             console.log("Mak sure all fields are entered!!!")
             return;
         }
+
+        setModels((prevModels) => [...prevModels, {name: addModel, description: addModelDescription}]);
         console.log("Added model " + JSON.stringify({
             name: addModel,
             description: addModelDescription,
         }, null, 2));
+
+        setAddModelDescription("");
+        setAddModel("")
     }
 
     return (
@@ -28,7 +39,7 @@ export default function Models() {
                 <h2>Add models</h2>
                     <div className="form-text__input-field">
                         <label>Model name</label>
-                        <input type={"text"} placeholder={addModel} onChange={(e) => {
+                        <input type={"text"} value={addModel} onChange={(e) => {
                             setAddModel(e.target.value);
                         }}></input>
                     </div>
@@ -36,7 +47,7 @@ export default function Models() {
 
                     <div className="form-text__input-field">
                         <label>Model description</label>
-                        <textarea className={"form-textarea"} placeholder={addModelDescription} onChange={(e) => {
+                        <textarea className={"form-textarea"} value={addModelDescription} onChange={(e) => {
                             setAddModelDescription(e.target.value);
                         }}/>
                     </div>
@@ -47,7 +58,7 @@ export default function Models() {
                     }}>Add</button>
                 </div>
             </form>
-            <ModelList />
+            <ModelList models={models}/>
 
         </div>
     )
