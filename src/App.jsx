@@ -10,6 +10,22 @@ export default function App() {
     const [activeView, setActiveView] = useState("Home");
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+        if (darkMode) {
+            return true
+        } else {
+            return false
+        }
+    });
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add("dark-mode");
+        } else {
+            document.documentElement.classList.remove("dark-mode");
+        }
+    }, [isDarkMode])
+
 
     useEffect(() => {
         console.log(`view changed to ${activeView}`)
@@ -52,11 +68,11 @@ export default function App() {
     return (
 
         <main>
-            <Header isOpen={isMenuOpen} toggleTitle={toggleMenuTitle} setIsOpen={setIsMenuOpen} setActiveView={setActiveView} />
+            <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle} setIsOpen={setIsMenuOpen} setActiveView={setActiveView} />
             <section className={"main-page"}>
                 {activeView === "Home" && <PromptChat/>}
                 {activeView === "Models" && <Models />}
-                {activeView === "Themes" && <Themes />}
+                {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
             </section>
         </main>
 

@@ -1,6 +1,6 @@
 import {useState} from "react";
 
-export default function Themes (){
+export default function Themes ({setIsDarkMode}){
 
     const storedTheme = localStorage.getItem("theme");
 
@@ -178,7 +178,10 @@ export default function Themes (){
                 changeTheme(theme);
                 setThemeClicked(theme)
             }}>
-                <div className={(themeClicked === theme) || (storedTheme && JSON.parse(storedTheme).name === theme.name) ? "theme-container theme_wrapper_clicked" : "theme-container"}>
+
+                {/*{(themeClicked === theme) || (storedTheme && JSON.parse(storedTheme).name === theme.name) ? "theme-container theme_wrapper_clicked" : "theme-container"}*/}
+
+                <div className={"theme-container"} style={(themeClicked === theme.name) || (storedTheme && JSON.parse(storedTheme).name === theme.name) ? {border: "2px solid var(--secondary)"} : {}}>
                     <div className={"theme"} style={{
                         backgroundColor: theme.colour.tertiary,
                     }}>
@@ -195,7 +198,19 @@ export default function Themes (){
 
     return (
         <div className={"theme-container__wrapper"}>
-            <h1>Themes</h1>
+            <h1>Settings</h1>
+            <div className={"form-text__input-field"}>
+                <label>Display Mode</label>
+                <div className={"button-selection__container"}>
+                    <button className={"general-button__selection"} onClick={() => {
+                        setIsDarkMode(true);
+                    }}>DarkMode</button>
+                    <button className={"general-button__selection"} onClick={() => {
+                        setIsDarkMode(false)
+                    }}>LightMode</button>
+                </div>
+            </div>
+            <h2>Themes</h2>
             <form className={"theme-form"}>
                 <div className="themes-container">
                     {themeList}
@@ -217,6 +232,7 @@ export default function Themes (){
                     }}>Cancel</button>
                 </div>}
             </form>
+
         </div>
     )
 }

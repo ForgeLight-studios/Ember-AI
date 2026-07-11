@@ -5,10 +5,10 @@ export default function PromptChat() {
 
     return (
         <>
-            <div className="prompt-chat__header">
+            <header className="prompt-chat__header">
                 <h1>Ember AI</h1>
                 <p>Welcome to Ember AI, A simple and locally hosted LLM web-app! Enjoy</p>
-            </div>
+            </header>
 
             <div className={isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}>
                 <textarea className="chat-box"
