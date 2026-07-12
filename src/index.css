@@ -418,6 +418,11 @@ header > h1 {
     height: calc(76px + 60px + 5px);
 }
 
+.dark-mode .prompt-chat_textarea {
+    border: 1px solid var(--dm-border-color);
+}
+
+
 .prompt-chat_textarea__focus {
     border: 2px solid var(--secondary);
 }
@@ -436,10 +441,75 @@ header > h1 {
 .chat-action-buttons {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
     width: calc(100% - 10px);
     height: 50px;
     padding: 5px;
 }
+
+.message {
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    width: fit-content;
+    max-width: 40%;
+    min-width: 20%;
+    margin-bottom: 10px;
+    background-color: var(--neutral);
+    box-shadow: 1px 1px 2px var(--tertiary-75);
+}
+
+.message-header > p {
+    margin: 0;
+    color: var(--secondary);
+    font-weight: bold;
+    font-size: 10px;
+    width: 60%;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.message-body > p {
+    margin: 0;
+}
+
+.prompt-chat__messages {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    height: 70%;
+    max-height: 740px;
+    overflow-y: scroll;
+}
+
+.message-user {
+    align-self: end;
+    border-radius: 5px 5px 5px 15px;
+}
+
+.message-ai {
+    border-radius: 5px 5px 15px 5px;
+}
+
+.message-ai > p {
+    text-align: left;
+}
+
+.message-ai > .message-header > p {
+    color: var(--tertiary);
+    text-align: right;
+    align-self: flex-end;
+}
+
+.message-ai > .message-header {
+    display: flex;
+    justify-content: flex-end;
+}
+
+
 
 /*----------------- models -----------------------*/
 
@@ -524,10 +594,6 @@ header > h1 {
     background-color: var(--dm-neutral);
 }
 
-.dark-mode .prompt-chat_textarea {
-    border: 1px solid var(--dm-border-color);
-}
-
 .dark-mode .menu-title:hover, .dark-mode .model-list__description {
     background-color: var(--dm-neutral);
 }
@@ -556,4 +622,12 @@ header > h1 {
 
 .dark-mode .models-header {
     border-bottom: 1px solid var(--dm-border-color);
+}
+
+.dark-mode .message-header > p{
+    border-bottom: 1px solid var(--dm-border-color);
+}
+
+.dark-mode .message {
+    background-color: var(--dm-neutral);
 }

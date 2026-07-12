@@ -1,14 +1,8 @@
 import {useState} from "react";
 import ModelList from "./ModelList.jsx";
 
-export default function Models() {
+export default function Models({models, setModels}) {
 
-    const [models, setModels] = useState([
-        {
-            name: "llama3.2",
-            description: "general chatting"
-        }
-    ]);
     const [addModel, setAddModel] = useState("");
     const [addModelDescription, setAddModelDescription] = useState("");
 

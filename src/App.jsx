@@ -6,7 +6,12 @@ import Models from "./components/Models.jsx";
 import Themes from "./components/Themes.jsx";
 
 export default function App() {
-
+    const [models, setModels] = useState([
+        {
+            name: "llama3.2",
+            description: "general chatting"
+        }
+    ]);
     const [activeView, setActiveView] = useState("Home");
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
@@ -70,8 +75,8 @@ export default function App() {
         <main>
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle} setIsOpen={setIsMenuOpen} setActiveView={setActiveView} />
             <section className={"main-page"}>
-                {activeView === "Home" && <PromptChat/>}
-                {activeView === "Models" && <Models />}
+                {activeView === "Home" && <PromptChat models={models} setModels={setModels} isDarkMode={isDarkMode} />}
+                {activeView === "Models" && <Models models={models} setModels={setModels}/>}
                 {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
             </section>
         </main>
