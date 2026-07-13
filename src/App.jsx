@@ -6,6 +6,7 @@ import Models from "./components/Models.jsx";
 import Themes from "./components/Themes.jsx";
 
 export default function App() {
+    const api_url = "http://localhost:3100"
     const [models, setModels] = useState([
         {
             name: "llama3.2",
@@ -75,7 +76,8 @@ export default function App() {
         <main>
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle} setIsOpen={setIsMenuOpen} setActiveView={setActiveView} />
             <section className={"main-page"}>
-                {activeView === "Home" && <PromptChat models={models} setModels={setModels} isDarkMode={isDarkMode} />}
+                {activeView === "Home" && <PromptChat models={models} setModels={setModels}
+                                                      isDarkMode={isDarkMode} url={api_url}/>}
                 {activeView === "Models" && <Models models={models} setModels={setModels}/>}
                 {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
             </section>

@@ -4,7 +4,7 @@ import Message from "./Message.jsx";
 import {nanoid} from "nanoid";
 
 
-export default function PromptChat({models, isDarkMode}) {
+export default function PromptChat({models, isDarkMode, url}) {
     const [messagesInChat, setMessagesInChat] = useState([])
     const [currentMessage, setCurrentMessage] = useState({
         text: "",
@@ -32,6 +32,31 @@ export default function PromptChat({models, isDarkMode}) {
     useEffect(() => {
         console.log("model chosen: ", selectedModel);
     }, [selectedModel]);
+
+    async function sendMessage() {
+        if (!selectedModel && !currentMessage.text) {
+            console.error("No message or model selected")
+            return
+        }
+        try {
+            const res = await fetch(url + "/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    model: selectedModel.name,
+                    message: currentMessage.text,
+                })
+            });
+            const resData = await res.json();
+            if (resData.success) {
+                setMessagesInChat((prevState) => ([...prevState, {text: resData.reply, sender: "bot"}]))
+            }
+        } catch (e) {
+            console.error(JSON.stringify(e.message))
+        }
+    }
     return (
         <>
             {messagesInChat.length <= 0 ? <header className="prompt-chat__header">
@@ -103,7 +128,7 @@ export default function PromptChat({models, isDarkMode}) {
                     }} onChange={(selectedOption) => {
                         setSelectedModel(selectedOption.value)
                     }}     noOptionsMessage={() => 'You have no models'}/>
-                    <button type={"submit"} className={"general-button success-button"} onClick={(e) => {
+                    <button type={"submit"} className={"general-button success-button"} onClick={async (e) => {
                         e.preventDefault();
                         if (currentMessage.text === "" || !selectedModel) {
                             return;
@@ -111,9 +136,12 @@ export default function PromptChat({models, isDarkMode}) {
                         setMessagesInChat((prevState) => {
                             return [...prevState, currentMessage]
                         })
-                        setMessagesInChat((prevState) => {
-                            return [...prevState, {text: "This is an ai response...", sender: "bot", id: nanoid()}]
-                        })
+
+                        await sendMessage()
+
+                        // setMessagesInChat((prevState) => {
+                        //     return [...prevState, {text: "This is an ai response...", sender: "bot", id: nanoid()}]
+                        // })
                         setCurrentMessage((prevState) => {
                             return {
                                 ...prevState,
