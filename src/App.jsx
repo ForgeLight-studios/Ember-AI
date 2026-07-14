@@ -7,6 +7,12 @@ import Themes from "./components/Themes.jsx";
 
 export default function App() {
     const api_url = "http://localhost:3100"
+    const [progress, setProgress] = useState({
+        completed: 0,
+        total: 0,
+    });
+    const [status, setStatus] = useState("Starting");
+    const [isModelPulling, setIsModelPulling] = useState(false);
     const [models, setModels] = useState([
         {
             name: "llama3.2",
@@ -32,11 +38,6 @@ export default function App() {
         }
     }, [isDarkMode])
 
-
-    useEffect(() => {
-        console.log(`view changed to ${activeView}`)
-    }, [activeView])
-
     useEffect(() => {
         if (toggleMenuTitle) {
             setToggleMenuTitle(false)
@@ -46,6 +47,95 @@ export default function App() {
             }, 350)
         }
     }, [isMenuOpen])
+
+    async function pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription) {
+        e.preventDefault();
+        setIsModelPulling(true);
+        setStatus("Starting");
+        setAddModelDescription("");
+        setAddModel("")
+        const model = {
+            name: addModel,
+            description: addModelDescription,
+        }
+
+        if (!addModel || !addModelDescription) {
+            console.log("Mak sure all fields are entered!!!")
+            setStatus("Please make sure all fields are entered!");
+            return;
+        }
+
+        try {
+            const response = await fetch(api_url + "/api/models/pull", {
+                method: "POST",
+                body: JSON.stringify({
+                    model: addModel,
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+
+            if (!response.ok) {
+                setStatus(`Error status code: ${response.status}`);
+                console.error(response.reason);
+                setTimeout(() => {
+                    setIsModelPulling(false);
+                }, 3000)
+                return;
+            }
+
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            while (true) {
+                const {done, value} = await reader.read();
+                // stops the loop if the stream is done
+                if (done) {
+                    setStatus("Successfully retrieved!");
+                    break;
+                }
+
+                // adds the decoded value to the buffer
+                buffer += decoder.decode(value, { stream: true });
+                // splits the buffer at newlines so they can be seperated
+                const events = buffer.split("\n\n");
+                // removes the first item from the event loop and assigns the value to buffer
+                buffer = events.pop()
+                for (const event of events) {
+                    const trimmed = event.trim();
+                    // removes the 'data: ' prefix so it can be parsed as json
+                    const chunk = JSON.parse(trimmed.slice(6));
+
+                    setStatus(chunk.status);
+
+                    if (chunk.total && chunk.completed) {
+                        setProgress({
+                            completed: chunk.completed ?? 0,
+                            total: chunk.total,
+                        })
+                    }
+                }
+            }
+        } catch (e) {
+            setStatus(e.message)
+            setTimeout(() => {
+                setIsModelPulling(false);
+            }, 3000)
+            console.log(e.message)
+            return;
+        }
+
+        setModels((prevModels) => [...prevModels, model]);
+        console.log("Added model " + JSON.stringify({
+            name: addModel,
+            description: addModelDescription,
+        }, null, 2));
+        setTimeout(() => {
+            setIsModelPulling(false);
+        }, 3000)
+    }
 
     const savedTheme = JSON.parse(localStorage.getItem("theme"));
     !savedTheme && localStorage.setItem("theme", JSON.stringify({
@@ -78,7 +168,10 @@ export default function App() {
             <section className={"main-page"}>
                 {activeView === "Home" && <PromptChat models={models} setModels={setModels}
                                                       isDarkMode={isDarkMode} url={api_url}/>}
-                {activeView === "Models" && <Models models={models} setModels={setModels}/>}
+                {activeView === "Models" && <Models models={models} setModels={setModels}
+                                                    api_url={api_url} pullModel={pullModel}
+                                                    status={status} progress={progress}
+                                                    isModelPulling={isModelPulling} />}
                 {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
             </section>
         </main>

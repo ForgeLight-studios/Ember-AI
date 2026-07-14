@@ -1,10 +1,11 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Select from 'react-select'
 import Message from "./Message.jsx";
 import {nanoid} from "nanoid";
 
 
 export default function PromptChat({models, isDarkMode, url}) {
+    const messageRef = useRef(null);
     const [messagesInChat, setMessagesInChat] = useState([])
     const [currentMessage, setCurrentMessage] = useState({
         text: "",
@@ -19,9 +20,15 @@ export default function PromptChat({models, isDarkMode, url}) {
         }
     })
 
-    const messageList = messagesInChat.map((message) => {
+    useEffect(() => {
+        messageRef.current?.scrollIntoView({behavior: "smooth"});
+    }, [messagesInChat])
+
+    const messageList = messagesInChat.map((message, index) => {
+        const length = messagesInChat.length;
+        const isLast = index === length-1
         return (
-            <Message text={message.text} key={message.id} user={message.sender} />
+            <Message text={message.text} key={message.id} user={message.sender} latestMessageRef={messageRef} isLast={isLast}/>
         )
     })
 

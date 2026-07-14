@@ -483,6 +483,7 @@ header > h1 {
     height: 70%;
     max-height: 740px;
     overflow-y: scroll;
+    padding: 0 30px 0 30px;
 }
 
 .message-user {
@@ -509,11 +510,10 @@ header > h1 {
     justify-content: flex-end;
 }
 
-
-
 /*----------------- models -----------------------*/
 
 .models-container {
+    overflow-y: scroll;
     padding: 10px;
     height: 60%;
     width: 50%;
@@ -544,8 +544,52 @@ header > h1 {
     margin-bottom: 0;
 }
 
+.model-status-on {
+    background-color: var(--neutral);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 15px;
+}
+
+.model-status-on > .model-status_text {
+    margin: 0;
+    border-radius: 10px;
+    background-color: var(--tertiary-75);
+    padding: 10px;
+    font-size: 15px;
+}
+
+.model-status_header {
+    font-size: 12px;
+    margin: 0;
+    font-weight: bold;
+    padding-left: 10px;
+    color: var(--secondary);
+}
+
+.progress-bar {
+    height: 5px;
+    background-color: var(--secondary-75);
+    border-radius: 10px;
+}
+
+.progress-bar_wrapper {
+    margin: 10px 0 0 10px;
+    height: 5px;
+    width: calc(100% - 20px);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.model-status-off {
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+
+
 .model-list__container {
-    overflow: scroll;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -630,4 +674,12 @@ header > h1 {
 
 .dark-mode .message {
     background-color: var(--dm-neutral);
+}
+
+.dark-mode .model-status-on {
+    background-color: var(--dm-neutral);
+}
+
+.dark-mode .progress-bar_wrapper {
+    border: 1px solid var(--dm-border-color);
 }

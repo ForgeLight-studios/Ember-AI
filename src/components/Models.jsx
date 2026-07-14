@@ -1,27 +1,18 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import ModelList from "./ModelList.jsx";
 
-export default function Models({models, setModels}) {
+export default function Models({models, status, progress, pullModel, isModelPulling}) {
+
 
     const [addModel, setAddModel] = useState("");
     const [addModelDescription, setAddModelDescription] = useState("");
 
-    async function AddModel(e) {
-        e.preventDefault();
-        if (!addModel || !addModelDescription) {
-            console.log("Mak sure all fields are entered!!!")
-            return;
-        }
+    useEffect(() => {
+        console.log(JSON.stringify("STATUS: " + status));
+        console.log("PROGRESS: " + JSON.stringify(progress));
+    }, [status, progress])
 
-        setModels((prevModels) => [...prevModels, {name: addModel, description: addModelDescription}]);
-        console.log("Added model " + JSON.stringify({
-            name: addModel,
-            description: addModelDescription,
-        }, null, 2));
 
-        setAddModelDescription("");
-        setAddModel("")
-    }
 
     return (
         <div className="models-container">
@@ -29,7 +20,7 @@ export default function Models({models, setModels}) {
                 <h1>Models</h1>
                 <p>The models available to use are currently only ollama free models</p>
             </div>
-            <form onSubmit={(e) => AddModel(e)}>
+            <form onSubmit={(e) => pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription)}>
                 <h2>Add models</h2>
                     <div className="form-text__input-field">
                         <label>Model name</label>
@@ -52,8 +43,14 @@ export default function Models({models, setModels}) {
                     }}>Add</button>
                 </div>
             </form>
+            <div className={isModelPulling ? "model-status-on" : "model-status-off"}>
+                <p className={"model-status_header"}>Pulling status</p>
+                <p className={"model-status_text"}>{status}</p>
+                <div className={"progress-bar_wrapper"}>
+                    <div className={"progress-bar"}     style={isModelPulling ? { width: `${((progress.completed / 10000000) / (progress.total / 10000000)) * 100}%` } : {}}></div>
+                </div>
+            </div>
             <ModelList models={models}/>
-
         </div>
     )
 }
