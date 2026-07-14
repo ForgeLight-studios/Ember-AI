@@ -4,6 +4,8 @@ import Header from "./components/Header.jsx";
 import PromptChat from "./components/PromptChat.jsx";
 import Models from "./components/Models.jsx";
 import Themes from "./components/Themes.jsx";
+import {nanoid} from "nanoid";
+import Notifications from "./components/Notifications.jsx";
 
 export default function App() {
     const api_url = "http://localhost:3100"
@@ -30,6 +32,10 @@ export default function App() {
             return false
         }
     });
+
+    const [notification, setNotification] = useState([]);
+
+
     useEffect(() => {
         if (isDarkMode) {
             document.documentElement.classList.add("dark-mode");
@@ -47,6 +53,27 @@ export default function App() {
             }, 350)
         }
     }, [isMenuOpen])
+
+    function handleNotification(type, message) {
+        const id = nanoid();
+
+        setNotification(prev => [...prev, { id, type, message, active: false }]);
+
+        // allow browser to paint the element first, then trigger transition
+        setTimeout(() => {
+            setNotification(prev => prev.map(n => n.id === id ? { ...n, active: true } : n));
+        }, 10);
+
+        setTimeout(() => {
+            setNotification(prev => prev.map(n => n.id === id ? { ...n, active: false } : n));
+        }, 3000);
+
+        // remove from DOM after the transition has finished
+        setTimeout(() => {
+            setNotification(prev => prev.filter(n => n.id !== id));
+        }, 3400); // 3500 + transition duration
+    }
+
 
     async function pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription) {
         e.preventDefault();
@@ -94,6 +121,7 @@ export default function App() {
                 // stops the loop if the stream is done
                 if (done) {
                     setStatus("Successfully retrieved!");
+                    handleNotification("notify", `Model: ${addModel} has been installed successfully!`);
                     break;
                 }
 
@@ -164,6 +192,7 @@ export default function App() {
     return (
 
         <main>
+            <Notifications notification={notification} setNotification={setNotification} />
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle} setIsOpen={setIsMenuOpen} setActiveView={setActiveView} />
             <section className={"main-page"}>
                 {activeView === "Home" && <PromptChat models={models} setModels={setModels}
