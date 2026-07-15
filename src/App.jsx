@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import './index.css'
 import Header from "./components/Header.jsx";
 import PromptChat from "./components/PromptChat.jsx";
@@ -8,51 +8,9 @@ import {nanoid} from "nanoid";
 import Notifications from "./components/Notifications.jsx";
 
 export default function App() {
-    const api_url = "http://localhost:3100"
-    const [progress, setProgress] = useState({
-        completed: 0,
-        total: 0,
-    });
-    const [status, setStatus] = useState("Starting");
-    const [isModelPulling, setIsModelPulling] = useState(false);
-    const [models, setModels] = useState([
-        {
-            name: "llama3.2",
-            description: "general chatting"
-        }
-    ]);
-    const [activeView, setActiveView] = useState("Home");
-    const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
-    const [isDarkMode, setIsDarkMode] = useState(() => {
-        const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
-        if (darkMode) {
-            return true
-        } else {
-            return false
-        }
-    });
 
     const [notification, setNotification] = useState([]);
 
-
-    useEffect(() => {
-        if (isDarkMode) {
-            document.documentElement.classList.add("dark-mode");
-        } else {
-            document.documentElement.classList.remove("dark-mode");
-        }
-    }, [isDarkMode])
-
-    useEffect(() => {
-        if (toggleMenuTitle) {
-            setToggleMenuTitle(false)
-        } else {
-            setTimeout(() => {
-                setToggleMenuTitle(prev => !prev)
-            }, 350)
-        }
-    }, [isMenuOpen])
 
     function handleNotification(type, message) {
         const id = nanoid();
@@ -74,26 +32,143 @@ export default function App() {
         }, 3400); // 3500 + transition duration
     }
 
+    const api_url = "http://localhost:3100"
+
+    async function apiCallHelper(route, type, params = [], body = null) {
+        console.log(`[apiCall] ${type} ${route}`);
+        if (!route || !type || (params === null && body === null)) {
+          handleNotification("error", "Internal error occurred")
+          return {
+              success: false,
+          }
+        }
+      let response
+      if (type === "GET") {
+          try {
+              response = await fetch(`${api_url}/${route}/${params.join()}`, {
+                  method: "GET",
+                  headers: {
+                      "Content-Type": "application/json",
+                  }
+              })
+          } catch (e) {
+              handleNotification("error", `Internal error occurred: ${e}`);
+              return {
+                  success: false,
+              }
+          }
+      } else if (type === "POST" || type === "DELETE" || type === "PATCH") {
+          try {
+              response = await fetch(`${api_url}/${route}`, {
+                  method: type,
+                  headers: {
+                      "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(body)
+              })
+          } catch (e) {
+              handleNotification("error", `Failed to make a call to the database: ${e}`)
+              return {
+                  success: false,
+              }
+          }
+      }
+        if (!response) {
+            handleNotification("error", `Unsupported method: ${type}`);
+            return { success: false };
+        }
+      const resData = await response.json();
+      if (!response.ok) {
+          handleNotification("error", `Could not perform request, reason:\n${resData.reason}`)
+          return {success: false}
+      }
+      return resData;
+    }
+
+    const [progress, setProgress] = useState({
+        completed: 0,
+        total: 0,
+    });
+    const [status, setStatus] = useState("Starting");
+    const [isModelPulling, setIsModelPulling] = useState(false);
+    const [models, setModels] = useState([]);
+    const [activeView, setActiveView] = useState("Home");
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+        if (darkMode) {
+            return true
+        } else {
+            return false
+        }
+    });
+
+    const didLoad = useRef(false);
+
+    useEffect(() => {
+        if (didLoad.current) return;
+        didLoad.current = true;
+
+        async function loadModels() {
+            handleNotification("notice", "Loading models")
+            const resData = await apiCallHelper("model/allmodels", "GET");
+            if (resData.success) {
+                setModels(resData.models);
+            }
+        }
+        loadModels()
+    }, [])
+
+
+
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add("dark-mode");
+        } else {
+            document.documentElement.classList.remove("dark-mode");
+        }
+    }, [isDarkMode])
+
+    useEffect(() => {
+        if (toggleMenuTitle) {
+            setToggleMenuTitle(false)
+        } else {
+            setTimeout(() => {
+                setToggleMenuTitle(prev => !prev)
+            }, 350)
+        }
+    }, [isMenuOpen])
 
     async function pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription) {
         e.preventDefault();
-        setIsModelPulling(true);
-        setStatus("Starting");
-        setAddModelDescription("");
-        setAddModel("")
-        const model = {
-            name: addModel,
-            description: addModelDescription,
-        }
 
         if (!addModel || !addModelDescription) {
             console.log("Mak sure all fields are entered!!!")
             setStatus("Please make sure all fields are entered!");
             return;
         }
+        const model = {
+            name: addModel,
+            description: addModelDescription,
+        }
+        const resData = await apiCallHelper("model/create", "POST", null, {name: addModel, description: addModelDescription, status: "pulling"});
+        model.status = "pulling"
+        setModels((prevModels) => [...prevModels, model]);
+        console.log(JSON.stringify(resData));
+        if (!resData.success) {
+            handleNotification("error", `could not saveModel to database`);
+            return;
+        }
+
+        setIsModelPulling(true);
+        setStatus("Starting");
+        setAddModelDescription("");
+        setAddModel("")
+
 
         try {
-            const response = await fetch(api_url + "/api/models/pull", {
+            const response = await fetch(api_url + "/ollama/pull", {
                 method: "POST",
                 body: JSON.stringify({
                     model: addModel,
@@ -102,7 +177,6 @@ export default function App() {
                     "Content-Type": "application/json"
                 }
             })
-
             if (!response.ok) {
                 setStatus(`Error status code: ${response.status}`);
                 console.error(response.reason);
@@ -122,6 +196,17 @@ export default function App() {
                 if (done) {
                     setStatus("Successfully retrieved!");
                     handleNotification("notify", `Model: ${addModel} has been installed successfully!`);
+                    const resData = await apiCallHelper("model/status", "PATCH", null, {name: addModel, status: "installed"});
+                    model.status = "installed"
+                    setModels((prevModels) =>
+                        prevModels.map(m =>
+                            m.name === model.name ? { ...m, status: "installed" } : m
+                        )
+                    );
+                    if (!resData.success) {
+                        handleNotification("error", `could not saveModel to database`);
+                        return;
+                    }
                     break;
                 }
 
@@ -133,6 +218,7 @@ export default function App() {
                 buffer = events.pop()
                 for (const event of events) {
                     const trimmed = event.trim();
+                    if (!trimmed.startsWith("data: ")) continue;
                     // removes the 'data: ' prefix so it can be parsed as json
                     const chunk = JSON.parse(trimmed.slice(6));
 
@@ -151,11 +237,20 @@ export default function App() {
             setTimeout(() => {
                 setIsModelPulling(false);
             }, 3000)
+            const resData = await apiCallHelper("model/status", "PATCH", null, {name: addModel, status: "failed"});
+            model.status = "failed";
+            setModels((prevModels) =>
+                prevModels.map(m =>
+                    m.name === model.name ? { ...m, status: "failed" } : m
+                )
+            );
+            if (!resData.success) {
+                handleNotification("error", `could not saveModel to database`);
+                return;
+            }
             console.log(e.message)
             return;
         }
-
-        setModels((prevModels) => [...prevModels, model]);
         console.log("Added model " + JSON.stringify({
             name: addModel,
             description: addModelDescription,
@@ -200,7 +295,7 @@ export default function App() {
                 {activeView === "Models" && <Models models={models} setModels={setModels}
                                                     api_url={api_url} pullModel={pullModel}
                                                     status={status} progress={progress}
-                                                    isModelPulling={isModelPulling} />}
+                                                    isModelPulling={isModelPulling} apiCallHelper={apiCallHelper}/>}
                 {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
             </section>
         </main>

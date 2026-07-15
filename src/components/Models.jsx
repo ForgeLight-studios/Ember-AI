@@ -12,8 +12,6 @@ export default function Models({models, status, progress, pullModel, isModelPull
         console.log("PROGRESS: " + JSON.stringify(progress));
     }, [status, progress])
 
-
-
     return (
         <div className="models-container">
             <div className="models-header">

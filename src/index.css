@@ -612,8 +612,25 @@ header > h1 {
     width: calc(100% - 20px);
 }
 
+.model-list__item-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
 .model-list__name {
     width: fit-content;
+    font-weight: bold;
+    margin: 0;
+}
+
+.model-list__status {
+    color: var(--secondary);
+    font-size: 12px;
+    background-color: var(--neutral);
+    border-radius: 10px;
+    padding: 10px;
     font-weight: bold;
     margin: 0;
 }
@@ -729,4 +746,8 @@ header > h1 {
 
 .dark-mode .progress-bar_wrapper {
     border: 1px solid var(--dm-border-color);
+}
+
+.dark-mode .model-list__status {
+    background-color: var(--dm-neutral);
 }

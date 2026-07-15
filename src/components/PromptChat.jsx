@@ -46,7 +46,7 @@ export default function PromptChat({models, isDarkMode, url}) {
             return
         }
         try {
-            const res = await fetch(url + "/api/chat", {
+            const res = await fetch(url + "/ollama/newChat", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
