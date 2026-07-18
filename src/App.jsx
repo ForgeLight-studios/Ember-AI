@@ -9,9 +9,12 @@ import Notifications from "./components/Notifications.jsx";
 
 export default function App() {
 
+    const [models, setModels] = useState([]);
+    const [chats, setChats] = useState([]);
+    const [currentChat, setCurrentChat] = useState("");
+
+
     const [notification, setNotification] = useState([]);
-
-
     function handleNotification(type, message) {
         const id = nanoid();
 
@@ -34,55 +37,51 @@ export default function App() {
 
     const api_url = "http://localhost:3100"
 
-    async function apiCallHelper(route, type, params = [], body = null) {
+    async function apiCallHelper(route, type, params = null, body = null) {
         console.log(`[apiCall] ${type} ${route}`);
-        if (!route || !type || (params === null && body === null)) {
-          handleNotification("error", "Internal error occurred")
-          return {
-              success: false,
-          }
-        }
-      let response
-      if (type === "GET") {
-          try {
-              response = await fetch(`${api_url}/${route}/${params.join()}`, {
-                  method: "GET",
-                  headers: {
-                      "Content-Type": "application/json",
-                  }
-              })
-          } catch (e) {
-              handleNotification("error", `Internal error occurred: ${e}`);
-              return {
-                  success: false,
-              }
-          }
-      } else if (type === "POST" || type === "DELETE" || type === "PATCH") {
-          try {
-              response = await fetch(`${api_url}/${route}`, {
-                  method: type,
-                  headers: {
-                      "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(body)
-              })
-          } catch (e) {
-              handleNotification("error", `Failed to make a call to the database: ${e}`)
-              return {
-                  success: false,
-              }
-          }
-      }
-        if (!response) {
-            handleNotification("error", `Unsupported method: ${type}`);
+
+        if (!route || !type) {
+            handleNotification("error", "Internal error occurred");
             return { success: false };
         }
-      const resData = await response.json();
-      if (!response.ok) {
-          handleNotification("error", `Could not perform request, reason:\n${resData.reason}`)
-          return {success: false}
-      }
-      return resData;
+
+        const allowedTypes = ["POST", "PATCH", "DELETE"];
+        const needsBody = allowedTypes.includes(type);
+        if (needsBody && body === null) {
+            handleNotification("error", "Internal error occurred");
+            return { success: false };
+        }
+
+        const fullUrl = params?.length
+            ? `${api_url}/${route}/${params.join()}`
+            : `${api_url}/${route}`;
+        const fetchObject = {
+            method: type,
+            ...(body !== null && {
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            })
+        };
+
+        try {
+            const response = await fetch(fullUrl, fetchObject)
+
+            if (!response) {
+                handleNotification("error", `Unsupported method: ${type}`);
+                return { success: false };
+            }
+            const resData = await response.json();
+            if (!response.ok) {
+                handleNotification("error", `Could not perform request, reason:\n${resData.reason}`)
+                return {success: false}
+            }
+            return resData;
+        } catch (e) {
+            handleNotification("error", `Internal error occurred: ${e}`);
+            return {
+              success: false,
+            }
+        }
     }
 
     const [progress, setProgress] = useState({
@@ -91,7 +90,6 @@ export default function App() {
     });
     const [status, setStatus] = useState("Starting");
     const [isModelPulling, setIsModelPulling] = useState(false);
-    const [models, setModels] = useState([]);
     const [activeView, setActiveView] = useState("Home");
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
@@ -119,8 +117,6 @@ export default function App() {
         }
         loadModels()
     }, [])
-
-
 
     useEffect(() => {
         if (isDarkMode) {
@@ -166,17 +162,17 @@ export default function App() {
         setAddModelDescription("");
         setAddModel("")
 
-
         try {
-            const response = await fetch(api_url + "/ollama/pull", {
-                method: "POST",
-                body: JSON.stringify({
-                    model: addModel,
-                }),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
+            const response = await apiCallHelper("model/create", "POST", null, {model: addModel})
+            // const response = await fetch(api_url + "/ollama/pull", {
+            //     method: "POST",
+            //     body: JSON.stringify({
+            //         model: addModel,
+            //     }),
+            //     headers: {
+            //         "Content-Type": "application/json"
+            //     }
+            // })
             if (!response.ok) {
                 setStatus(`Error status code: ${response.status}`);
                 console.error(response.reason);
@@ -288,10 +284,13 @@ export default function App() {
 
         <main>
             <Notifications notification={notification} setNotification={setNotification} />
-            <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle} setIsOpen={setIsMenuOpen} setActiveView={setActiveView} />
+            <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
+                    setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats} />
             <section className={"main-page"}>
-                {activeView === "Home" && <PromptChat models={models} setModels={setModels}
-                                                      isDarkMode={isDarkMode} url={api_url}/>}
+                {activeView === "Home"  && <PromptChat models={models} setModels={setModels}
+                                                      isDarkMode={isDarkMode} url={api_url}
+                                                      handleNotification={handleNotification} setChats={setChats} chats={chats}
+                                                      currentChat={currentChat} setCurrentChat={setCurrentChat} />}
                 {activeView === "Models" && <Models models={models} setModels={setModels}
                                                     api_url={api_url} pullModel={pullModel}
                                                     status={status} progress={progress}

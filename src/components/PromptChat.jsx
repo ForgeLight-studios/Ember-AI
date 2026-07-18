@@ -4,13 +4,21 @@ import Message from "./Message.jsx";
 import {nanoid} from "nanoid";
 
 
-export default function PromptChat({models, isDarkMode, url}) {
+export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat, setCurrentChat, setChats, chats }) {
     const messageRef = useRef(null);
-    const [messagesInChat, setMessagesInChat] = useState([])
+    const messagesInChat = chats.find((chat) => !chat ? {} : chat.id === currentChat.id)?.messages ?? []
     const [currentMessage, setCurrentMessage] = useState({
         text: "",
         sender: "user"
     })
+
+    useEffect(() => {
+        console.log("CHATS: " + JSON.stringify(chats, null, 2));
+    }, [chats])
+    useEffect(() => {
+        console.log(`CURRENT CHAT: ${JSON.stringify(currentChat, null, 2 )}`);
+    }, [currentChat]);
+
     const [selectedModel, setSelectedModel] = useState("Choose Model");
     const [isTyping, setIsTyping] = useState(false);
     const modelOptions = models.map((model) => {
@@ -41,10 +49,6 @@ export default function PromptChat({models, isDarkMode, url}) {
     }, [selectedModel]);
 
     async function sendMessage() {
-        if (!selectedModel && !currentMessage.text) {
-            console.error("No message or model selected")
-            return
-        }
         try {
             const res = await fetch(url + "/ollama/newChat", {
                 method: "POST",
@@ -58,7 +62,16 @@ export default function PromptChat({models, isDarkMode, url}) {
             });
             const resData = await res.json();
             if (resData.success) {
-                setMessagesInChat((prevState) => ([...prevState, {text: resData.reply, sender: "bot"}]))
+                setChats((prevState) => {
+                    return prevState.map((c) => {
+                        if (c.id === currentChat.id) {
+                            return {
+                                ...c,
+                                messages: [...c.messages, {text: resData.reply, sender: "bot", id: nanoid()}]
+                            }
+                        }
+                    })
+                })
             }
         } catch (e) {
             console.error(JSON.stringify(e.message))
@@ -138,17 +151,33 @@ export default function PromptChat({models, isDarkMode, url}) {
                     <button type={"submit"} className={"general-button success-button"} onClick={async (e) => {
                         e.preventDefault();
                         if (currentMessage.text === "" || !selectedModel) {
+                            handleNotification("error", "Please select a model or add a message")
                             return;
                         }
-                        setMessagesInChat((prevState) => {
-                            return [...prevState, currentMessage]
-                        })
-
+                        if (!currentChat) {
+                            const newChatId = nanoid();
+                            setCurrentChat({
+                                name: currentMessage.text.split(" ").splice(0, 8).join(" "),
+                                id: newChatId
+                            });
+                            setChats((prev) => {
+                                return [...prev, {
+                                    id: newChatId,
+                                    name: currentMessage.text.split(" ").splice(0, 8).join(" "),
+                                    messages: [currentMessage],
+                            }]})
+                        } else {
+                            setChats((prevState) => {
+                                return prevState.map((c) => {
+                                    if (c.id === currentChat.id) {
+                                        return {...c, messages: [...c.messages, currentMessage]};
+                                    }
+                                    return c;
+                                })
+                            })
+                        }
                         await sendMessage()
 
-                        // setMessagesInChat((prevState) => {
-                        //     return [...prevState, {text: "This is an ai response...", sender: "bot", id: nanoid()}]
-                        // })
                         setCurrentMessage((prevState) => {
                             return {
                                 ...prevState,
