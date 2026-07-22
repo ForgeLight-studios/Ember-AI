@@ -6,10 +6,11 @@ import {nanoid} from "nanoid";
 
 export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat, setCurrentChat, setChats, chats }) {
     const messageRef = useRef(null);
-    const messagesInChat = chats.find((chat) => !chat ? {} : chat.id === currentChat.id)?.messages ?? []
+    // const messagesInChat = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages ?? [];
     const [currentMessage, setCurrentMessage] = useState({
         text: "",
-        sender: "user"
+        sender: "user",
+        id: nanoid()
     })
 
     useEffect(() => {
@@ -30,25 +31,17 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     useEffect(() => {
         messageRef.current?.scrollIntoView({behavior: "smooth"});
-    }, [messagesInChat])
+    }, [chats])
 
-    const messageList = messagesInChat.map((message, index) => {
-        const length = messagesInChat.length;
+    const messageList = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages.map((message, index) => {
+        const length = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages.length;
         const isLast = index === length-1
         return (
-            <Message text={message.text} key={message.id} user={message.sender} latestMessageRef={messageRef} isLast={isLast}/>
+            <Message text={message.text} key={message.id} user={message.sender} latestMessageRef={messageRef} isLast={isLast} assistant={message.assistant? "" :  message.assistant}/>
         )
     })
 
-    useEffect(() => {
-        console.log("messages in chat: ", JSON.stringify(messagesInChat, null, 2));
-    }, [messagesInChat]);
-
-    useEffect(() => {
-        console.log("model chosen: ", selectedModel);
-    }, [selectedModel]);
-
-    async function sendMessage() {
+    async function sendMessage(newChatId) {
         try {
             const res = await fetch(url + "/ollama/newChat", {
                 method: "POST",
@@ -62,14 +55,16 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             });
             const resData = await res.json();
             if (resData.success) {
+                console.log("BOT RESPONSE: " + resData.reply);
                 setChats((prevState) => {
                     return prevState.map((c) => {
-                        if (c.id === currentChat.id) {
+                        if (c.id === newChatId) {
                             return {
                                 ...c,
-                                messages: [...c.messages, {text: resData.reply, sender: "bot", id: nanoid()}]
+                                messages: [...c.messages, {text: resData.reply, sender: "bot", id: nanoid(), assistant: selectedModel.name}]
                             }
                         }
+                        return c
                     })
                 })
             }
@@ -79,7 +74,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     }
     return (
         <>
-            {messagesInChat.length <= 0 ? <header className="prompt-chat__header">
+            {!currentChat ? <header className="prompt-chat__header">
                 <h1>Ember AI</h1>
                 <p>Welcome to Ember AI, A simple and locally hosted LLM web-app! Enjoy</p>
             </header> :
@@ -90,7 +85,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
 
             <form className={isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}
-                 style={messagesInChat <= 0 ? {} : {margin: '60px 0 60px 0'}}>
+                 style={!currentChat ? {} : {margin: '60px 0 60px 0'}}>
                 <textarea className="chat-box"
                           placeholder={"Write a message..."}
                           onFocus={() => setIsTyping( true)}
@@ -154,8 +149,9 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                             handleNotification("error", "Please select a model or add a message")
                             return;
                         }
+                        let newChatId
                         if (!currentChat) {
-                            const newChatId = nanoid();
+                            newChatId = nanoid();
                             setCurrentChat({
                                 name: currentMessage.text.split(" ").splice(0, 8).join(" "),
                                 id: newChatId
@@ -167,6 +163,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                                     messages: [currentMessage],
                             }]})
                         } else {
+                            newChatId = currentChat.id
                             setChats((prevState) => {
                                 return prevState.map((c) => {
                                     if (c.id === currentChat.id) {
@@ -176,7 +173,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                                 })
                             })
                         }
-                        await sendMessage()
+                        await sendMessage(newChatId)
 
                         setCurrentMessage((prevState) => {
                             return {

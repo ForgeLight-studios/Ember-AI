@@ -683,6 +683,25 @@ header > h1 {
     transition: width 0.3s ease-in-out;
 }
 
+/*--------------------- Menu-chatList ----------------------*/
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 5px;
+}
+
+.chat-list > p {
+    border-radius: 10px;
+    margin: 0;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.chat-list > p:hover {
+    background-color: var(--neutral);
+}
+
 /* Dark Mode Specific Adjustments */
 .dark-mode {
     color-scheme: dark;
@@ -749,5 +768,9 @@ header > h1 {
 }
 
 .dark-mode .model-list__status {
+    background-color: var(--dm-neutral);
+}
+
+.dark-mode .chat-list > p:hover {
     background-color: var(--dm-neutral);
 }

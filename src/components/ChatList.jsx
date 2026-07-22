@@ -1,10 +1,12 @@
-export default function ChatList ({chatName, }) {
-
+export default function ChatList ({chats}) {
+    const chatList = chats.map((chat) => {
+        return(<p>
+            {chat.name}
+        </p>)
+    })
     return (
         <div className={"chat-list"}>
-            <div className={"chat-list__item"}>
-                <p>{chatName}</p>
-            </div>
+                {chatList}
         </div>
     )
 }

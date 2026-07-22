@@ -11,7 +11,7 @@ export default function App() {
 
     const [models, setModels] = useState([]);
     const [chats, setChats] = useState([]);
-    const [currentChat, setCurrentChat] = useState("");
+    const [currentChat, setCurrentChat] = useState(null);
 
 
     const [notification, setNotification] = useState([]);
