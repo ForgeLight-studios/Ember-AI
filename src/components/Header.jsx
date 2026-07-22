@@ -6,10 +6,12 @@ import themeImageLight from "../assets/theme-icon-light.svg";
 import themeImageDark from "../assets/theme-icon-dark.svg";
 import modelImageDark from "../assets/model-icon-dark.svg";
 import homeImageDark from "../assets/home-icon-dark.svg";
+import chatImageDark from "../assets/chats-icon-dark.svg";
+import chatImageLight from "../assets/chats-icon-light.svg";
 import {useState} from "react";
 import ChatList from "./ChatList.jsx";
 
-export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats }) {
+export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat }) {
 
     const [chatList, setChatList] = useState(false);
 
@@ -29,10 +31,10 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                         setChatList(true);
                     }
                 }}>
-                    <img style={isOpen ? {width: "30px", height: "30px"} : {}} src={isDarkMode ? themeImageDark : themeImageLight} alt={"Chats"} />
+                    <img style={isOpen ? {width: "30px", height: "30px"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"} />
                     {isOpen && <p>{"Chats"}</p>}
                 </div>
-                {chatList && <ChatList chats={chats}/>}
+                {chatList && <ChatList chats={chats} currentChat={currentChat} />}
                 <MenuItem itemImage={isDarkMode ? homeImageDark : homeImageLight} itemName={"Home"} isMenuOpen={isOpen}  setActiveView={setActiveView}/>
                 <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen} setActiveView={setActiveView}/>
                 <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Themes"} isMenuOpen={isOpen} setActiveView={setActiveView}/>

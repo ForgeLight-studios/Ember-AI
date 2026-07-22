@@ -702,6 +702,10 @@ header > h1 {
     background-color: var(--neutral);
 }
 
+.active-chat {
+    background-color: var(--neutral);
+}
+
 /* Dark Mode Specific Adjustments */
 .dark-mode {
     color-scheme: dark;
@@ -772,5 +776,9 @@ header > h1 {
 }
 
 .dark-mode .chat-list > p:hover {
+    background-color: var(--dm-neutral);
+}
+
+.dark-mode .active-chat {
     background-color: var(--dm-neutral);
 }

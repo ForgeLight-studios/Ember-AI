@@ -285,7 +285,8 @@ export default function App() {
         <main>
             <Notifications notification={notification} setNotification={setNotification} />
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
-                    setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats} />
+                    setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
+                    currentChat={currentChat} />
             <section className={"main-page"}>
                 {activeView === "Home"  && <PromptChat models={models} setModels={setModels}
                                                       isDarkMode={isDarkMode} url={api_url}

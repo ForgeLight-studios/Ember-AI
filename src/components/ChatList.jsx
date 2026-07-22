@@ -1,6 +1,6 @@
-export default function ChatList ({chats}) {
+export default function ChatList ({chats, currentChat}) {
     const chatList = chats.map((chat) => {
-        return(<p>
+        return(<p className={currentChat ? currentChat.name === chat.name ? "active-chat" : "" : ""}>
             {chat.name}
         </p>)
     })
