@@ -168,7 +168,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                                         return {
                                             ...c,
                                             messages: [...c.messages, currentMessage],
-                                            name: currentMessage.text.slice(0, 8).trim()
+                                            name: currentMessage.text.slice(0, 25).trim()
                                         }
                                     }
                                     return c
@@ -181,6 +181,12 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                                     ...prevState,
                                     text: "",
                                     id: nanoid()
+                                }
+                            })
+                            setCurrentChat(prevState => {
+                                return {
+                                    ...prevState,
+                                    name: currentMessage.text.slice(0, 25).trim()
                                 }
                             })
                         }}>Send</button>

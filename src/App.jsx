@@ -304,6 +304,7 @@ export default function App() {
                     currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
                     handleNotification={handleNotification} apiCallHelper={apiCallHelper} setChats={setChats} />
             <section className={"main-page"}>
+                <p className={"chat-name"}>{currentChat?.name}</p>
                 {activeView === "Home"  && <PromptChat models={models} setModels={setModels}
                                                       isDarkMode={isDarkMode} url={api_url}
                                                       handleNotification={handleNotification} setChats={setChats} chats={chats}
