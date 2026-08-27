@@ -267,10 +267,6 @@ export default function App() {
                     m.name === model.name ? { ...m, status: "failed" } : m
                 )
             );
-            if (!resData.success) {
-                handleNotification("error", `could not saveModel to database`);
-                return;
-            }
             console.log(e.message)
         }
     }

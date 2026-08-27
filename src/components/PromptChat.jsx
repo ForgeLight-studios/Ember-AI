@@ -22,10 +22,9 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     const [selectedModel, setSelectedModel] = useState("Choose Model");
     const [isTyping, setIsTyping] = useState(false);
-    const modelOptions = models.map((model) => {
+    const modelOptions = models.filter((model) => model.status !== "failed").map((m) => {
         return {
-            label: model.name,
-            value: model,
+            label: m.name, value: m
         }
     })
 
@@ -37,7 +36,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         const length = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages.length;
         const isLast = index === length-1
         return (
-            <Message text={message.text} key={message.id} user={message.sender} latestMessageRef={messageRef} isLast={isLast} assistant={message.assistant? "" :  message.assistant}/>
+            <Message text={message.text} key={message.id} user={message.sender} latestMessageRef={messageRef} isLast={isLast} assistant={message.assistant}/>
         )
     })
 
@@ -53,21 +52,26 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     message: currentMessage.text,
                 })
             });
+
             const resData = await res.json();
-            if (resData.success) {
-                console.log("BOT RESPONSE: " + resData.reply);
-                setChats((prevState) => {
-                    return prevState.map((c) => {
-                        if (c.id === newChatId) {
-                            return {
-                                ...c,
-                                messages: [...c.messages, {text: resData.reply, sender: "bot", id: nanoid(), assistant: selectedModel.name}]
-                            }
-                        }
-                        return c
-                    })
-                })
+
+            if (!resData.success) {
+                handleNotification("error", "Model Contact failed: " + res.reason);
+                return
             }
+
+            console.log("BOT RESPONSE: " + resData.reply);
+            setChats((prevState) => {
+                return prevState.map((c) => {
+                    if (c.id === newChatId) {
+                        return {
+                            ...c,
+                            messages: [...c.messages, {text: resData.reply, sender: "assistant", id: nanoid(), assistant: selectedModel.name}]
+                        }
+                    }
+                    return c
+                })
+            })
         } catch (e) {
             console.error(JSON.stringify(e.message))
         }
@@ -164,7 +168,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                                         return {
                                             ...c,
                                             messages: [...c.messages, currentMessage],
-                                            name: currentMessage.text.slice(0, 8)
+                                            name: currentMessage.text.slice(0, 8).trim()
                                         }
                                     }
                                     return c
