@@ -11,7 +11,8 @@ export default function App() {
 
     const [models, setModels] = useState([]);
     const [chats, setChats] = useState([]);
-    const [currentChat, setCurrentChat] = useState(null);
+    // const [isChatList, setIsChatList] = useState(false);
+    const [currentChat, setCurrentChat] = useState({id: "", name: ""});
 
 
     const [notification, setNotification] = useState([]);
@@ -36,6 +37,16 @@ export default function App() {
     }
 
     const api_url = "http://localhost:3100"
+
+    function newChat() {
+        console.log("creating a New chat");
+        if (currentChat.name === "New chat") return
+        const chatId = nanoid()
+        const newChat = { id: chatId, name: "New chat", messages: []};
+        setChats(prev => [...prev, newChat]);
+        setCurrentChat(newChat);
+        return chatId
+    }
 
     async function apiCallHelper(route, type, params = null, body = null) {
         console.log(`[apiCall] ${type} ${route}`);
@@ -163,22 +174,19 @@ export default function App() {
         setAddModel("")
 
         try {
-            const response = await apiCallHelper("model/create", "POST", null, {model: addModel})
-            // const response = await fetch(api_url + "/ollama/pull", {
-            //     method: "POST",
-            //     body: JSON.stringify({
-            //         model: addModel,
-            //     }),
-            //     headers: {
-            //         "Content-Type": "application/json"
-            //     }
-            // })
+            // const response = await apiCallHelper("ollama/pull", "POST", null, {model: addModel})
+            const response = await fetch(api_url + "/ollama/pull", {
+                method: "POST",
+                body: JSON.stringify({
+                    model: addModel,
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
             if (!response.ok) {
                 setStatus(`Error status code: ${response.status}`);
-                console.error(response.reason);
-                setTimeout(() => {
-                    setIsModelPulling(false);
-                }, 3000)
+                setTimeout(() => setIsModelPulling(false), 3000);
                 return;
             }
 
@@ -218,7 +226,26 @@ export default function App() {
                     // removes the 'data: ' prefix so it can be parsed as json
                     const chunk = JSON.parse(trimmed.slice(6));
 
-                    setStatus(chunk.status);
+                    if (chunk.error) {
+                        setStatus(chunk.error);
+                        handleNotification("error", `Pull failed: ${chunk.error}`);
+                        await apiCallHelper("model/status", "PATCH", null, { name: addModel, status: "failed" });
+                        setModels(prev => prev.map(m => m.name === model.name ? { ...m, status: "failed" } : m));
+                        setTimeout(() => setIsModelPulling(false), 3000);
+                        return;
+                    }
+
+                    if (chunk.done) {
+                        console.log("Added model " + JSON.stringify({
+                            name: addModel,
+                            description: addModelDescription,
+                        }, null, 2));
+                        setTimeout(() => {
+                            setIsModelPulling(false);
+                        }, 3000)
+                    }
+
+                    if (chunk.status) setStatus(chunk.status);
 
                     if (chunk.total && chunk.completed) {
                         setProgress({
@@ -245,15 +272,7 @@ export default function App() {
                 return;
             }
             console.log(e.message)
-            return;
         }
-        console.log("Added model " + JSON.stringify({
-            name: addModel,
-            description: addModelDescription,
-        }, null, 2));
-        setTimeout(() => {
-            setIsModelPulling(false);
-        }, 3000)
     }
 
     const savedTheme = JSON.parse(localStorage.getItem("theme"));
@@ -286,12 +305,14 @@ export default function App() {
             <Notifications notification={notification} setNotification={setNotification} />
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
-                    currentChat={currentChat} />
+                    currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
+                    handleNotification={handleNotification} apiCallHelper={apiCallHelper} setChats={setChats} />
             <section className={"main-page"}>
                 {activeView === "Home"  && <PromptChat models={models} setModels={setModels}
                                                       isDarkMode={isDarkMode} url={api_url}
                                                       handleNotification={handleNotification} setChats={setChats} chats={chats}
-                                                      currentChat={currentChat} setCurrentChat={setCurrentChat} />}
+                                                      currentChat={currentChat} setCurrentChat={setCurrentChat}
+                                                       apiCallHelper={apiCallHelper} newChat={newChat}/>}
                 {activeView === "Models" && <Models models={models} setModels={setModels}
                                                     api_url={api_url} pullModel={pullModel}
                                                     status={status} progress={progress}

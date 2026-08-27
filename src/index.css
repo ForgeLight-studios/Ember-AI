@@ -112,6 +112,12 @@ main {
     cursor: pointer;
 }
 
+.disabled-button {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
 /*-------------------- forms ---------------------*/
 
 .form-text__input-field {
@@ -698,13 +704,18 @@ header > h1 {
     cursor: pointer;
 }
 
-.chat-list > p:hover {
+.chat-list > .chat:hover {
     background-color: var(--neutral);
 }
 
 .active-chat {
     background-color: var(--neutral);
 }
+
+.chat-list > .add-chat:hover {
+    background-color: var(--secondary-75);
+}
+
 
 /* Dark Mode Specific Adjustments */
 .dark-mode {
@@ -775,7 +786,7 @@ header > h1 {
     background-color: var(--dm-neutral);
 }
 
-.dark-mode .chat-list > p:hover {
+.dark-mode .chat-list > .chat:hover {
     background-color: var(--dm-neutral);
 }
 

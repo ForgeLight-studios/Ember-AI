@@ -4,7 +4,7 @@ import Message from "./Message.jsx";
 import {nanoid} from "nanoid";
 
 
-export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat, setCurrentChat, setChats, chats }) {
+export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat, setChats, chats, newChat, setCurrentChat}) {
     const messageRef = useRef(null);
     // const messagesInChat = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages ?? [];
     const [currentMessage, setCurrentMessage] = useState({
@@ -74,7 +74,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     }
     return (
         <>
-            {!currentChat ? <header className="prompt-chat__header">
+            {currentChat.id === "" ? <header className="prompt-chat__header">
                 <h1>Ember AI</h1>
                 <p>Welcome to Ember AI, A simple and locally hosted LLM web-app! Enjoy</p>
             </header> :
@@ -143,46 +143,43 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     }} onChange={(selectedOption) => {
                         setSelectedModel(selectedOption.value)
                     }}     noOptionsMessage={() => 'You have no models'}/>
-                    <button type={"submit"} className={"general-button success-button"} onClick={async (e) => {
-                        e.preventDefault();
-                        if (currentMessage.text === "" || !selectedModel) {
-                            handleNotification("error", "Please select a model or add a message")
-                            return;
-                        }
-                        let newChatId
-                        if (!currentChat) {
-                            newChatId = nanoid();
-                            setCurrentChat({
-                                name: currentMessage.text.split(" ").splice(0, 8).join(" "),
-                                id: newChatId
-                            });
-                            setChats((prev) => {
-                                return [...prev, {
-                                    id: newChatId,
-                                    name: currentMessage.text.split(" ").splice(0, 8).join(" "),
-                                    messages: [currentMessage],
-                            }]})
-                        } else {
-                            newChatId = currentChat.id
+                        <button type={"submit"} className={"general-button success-button"} onClick={async (e) => {
+                            e.preventDefault();
+                            if (currentMessage.text === "" || !selectedModel?.name) {
+                                handleNotification("error", "Please select a model or add a message")
+                                return;
+                            }
+
+                            let chatId
+
+                            if (currentChat?.name !== "New chat") {
+                                chatId = newChat()
+                            } else {
+                                chatId = currentChat.id
+                            }
+
                             setChats((prevState) => {
                                 return prevState.map((c) => {
-                                    if (c.id === currentChat.id) {
-                                        return {...c, messages: [...c.messages, currentMessage]};
+                                    if (c.id === chatId) {
+                                        return {
+                                            ...c,
+                                            messages: [...c.messages, currentMessage],
+                                            name: currentMessage.text.slice(0, 8)
+                                        }
                                     }
-                                    return c;
+                                    return c
                                 })
                             })
-                        }
-                        await sendMessage(newChatId)
 
-                        setCurrentMessage((prevState) => {
-                            return {
-                                ...prevState,
-                                text: "",
-                                id: nanoid()
-                            }
-                        })
-                    }}>Send</button>
+                            await sendMessage(chatId)
+                            setCurrentMessage((prevState) => {
+                                return {
+                                    ...prevState,
+                                    text: "",
+                                    id: nanoid()
+                                }
+                            })
+                        }}>Send</button>
                 </div>
             </form>
         </>

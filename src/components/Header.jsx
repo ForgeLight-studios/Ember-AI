@@ -8,12 +8,28 @@ import modelImageDark from "../assets/model-icon-dark.svg";
 import homeImageDark from "../assets/home-icon-dark.svg";
 import chatImageDark from "../assets/chats-icon-dark.svg";
 import chatImageLight from "../assets/chats-icon-light.svg";
-import {useState} from "react";
 import ChatList from "./ChatList.jsx";
 
-export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat }) {
+export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat,
+                                    handleNotification, apiCallHelper, setChats,
+                                    setCurrentChat, newChat }) {
 
-    const [chatList, setChatList] = useState(false);
+    async function createNewChat() {
+        try {
+            const res = await apiCallHelper("chats/createChat", "POST", null, {
+                id: currentChat.id, title: currentChat.name
+            })
+
+            if (!res.ok) {
+                handleNotification("notice", `Could not create new chat Error: ${res.status}`);
+                return;
+            }
+            console.log("New chat was created successfully.");
+        } catch (e) {
+            console.error(e.message);
+            handleNotification("error", `Could not create new chat Error: ${e.message}`);
+        }
+    }
 
     return (
         <div className={isOpen ? "menu-open menu" : "menu"}>
@@ -22,19 +38,12 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                 {toggleTitle && <h1>Ember AI</h1>}
             </div>
             <div className={"menu-item-list"}>
-                <div title={"Chats"} className="menu-item" onClick={() => {
-                    setChatList(prev => !prev);
-                    if (chatList) {
-                        setChatList(false);
-                    } else {
-                        setIsOpen(true);
-                        setChatList(true);
-                    }
-                }}>
+                <div title={"Chats"} className="menu-item" onClick={() => setIsOpen(true)}>
                     <img style={isOpen ? {width: "30px", height: "30px"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"} />
                     {isOpen && <p>{"Chats"}</p>}
                 </div>
-                {chatList && <ChatList chats={chats} currentChat={currentChat} />}
+                {isOpen && <ChatList chats={chats} currentChat={currentChat} createNewChat={createNewChat}
+                                         setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}/>}
                 <MenuItem itemImage={isDarkMode ? homeImageDark : homeImageLight} itemName={"Home"} isMenuOpen={isOpen}  setActiveView={setActiveView}/>
                 <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen} setActiveView={setActiveView}/>
                 <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Themes"} isMenuOpen={isOpen} setActiveView={setActiveView}/>
