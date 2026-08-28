@@ -4,7 +4,7 @@ export default function Message ({text, user, latestMessageRef, isLast, assistan
             <div className={"message-header"}>
                 <p>{user === "assistant" ? `${assistant}` : user}</p>
             </div>
-            <div className={"message-body"}>
+            <div className={user === "assistant" ? "assistant-message__body" : "message-body"}>
                 <p>{text}</p>
             </div>
         </div>

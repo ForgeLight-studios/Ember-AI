@@ -14,13 +14,20 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         id: nanoid()
     })
 
-    const [selectedModel, setSelectedModel] = useState("Choose Model");
+    const [selectedModel, setSelectedModel] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const modelOptions = models.filter((model) => model.status !== "failed").map((m) => {
         return {
             label: m.name, value: m
         }
     })
+
+    useEffect(() => {
+        if (!selectedModel?.name && modelOptions.length > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setSelectedModel(modelOptions[0].value);
+        }
+    }, [models]);
 
     useEffect(() => {
         messageRef.current?.scrollIntoView({behavior: "smooth"});
@@ -100,7 +107,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     return {
                         ...c,
                         messages: [...c.messages, newMessage],
-                        name: newMessage.text.slice(0, 25).trim()
+                        name: newMessage.text.slice(0, 20).trim()
                     }
                 }
                 return c
@@ -111,14 +118,14 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         setCurrentChat(prevState => {
             return {
                 ...prevState,
-                name: currentMessage.text.slice(0, 25).trim()
+                name: currentMessage.text.slice(0, 20).trim()
             }
         })
     }
 
     return (
         <>
-            {currentChat.id === "" ? <header className="prompt-chat__header">
+            {(currentChat.name === "New chat" || currentChat.name === "") ? <header className="prompt-chat__header">
                 <h1>Ember AI</h1>
                 <p>Welcome to Ember AI, A simple and locally hosted LLM web-app! Enjoy</p>
             </header> :
@@ -150,7 +157,9 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                           }}
                 ></textarea>
                 <div className={"chat-action-buttons"}>
-                    <Select options={modelOptions} styles={{
+                    <Select options={modelOptions}
+                            value={modelOptions.find(o => o.value.name === selectedModel?.name) ?? null}
+                            styles={{
                         container: (base, state) => ({
                             ...base,
                             width: '40%',
