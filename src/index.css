@@ -61,7 +61,7 @@ main {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: 100vh;
     width: 100%;
 }
 
@@ -419,9 +419,10 @@ header > h1 {
 .prompt-chat_textarea {
     border: 1px solid var(--border-color);
     background-color: white;
-    width: 60%;
     border-radius: 10px;
     height: calc(76px + 60px + 5px);
+    box-shadow: 5px 10px 5px var(--neutral);
+    width: 90%;
 }
 
 .dark-mode .prompt-chat_textarea {
@@ -473,7 +474,6 @@ header > h1 {
     width: fit-content;
     max-width: 40%;
     min-width: 20%;
-    margin-bottom: 10px;
     background-color: var(--neutral);
     box-shadow: 1px 1px 2px var(--tertiary-75);
 }
@@ -484,7 +484,7 @@ header > h1 {
     font-weight: bold;
     font-size: 10px;
     width: 60%;
-    border-bottom: 1px solid var(--border-color);
+    /*border-bottom: 1px solid var(--border-color);*/
 }
 
 .message-body > p {
@@ -494,11 +494,11 @@ header > h1 {
 .prompt-chat__messages {
     display: flex;
     flex-direction: column;
-    width: 60%;
-    height: 70%;
-    max-height: 740px;
+    width: 80%;
+    height: 90%;
     overflow-y: scroll;
     padding: 0 30px 0 30px;
+    gap: 20px;
 }
 
 .message-user {
@@ -506,23 +506,19 @@ header > h1 {
     border-radius: 5px 5px 5px 15px;
 }
 
-.message-ai {
-    border-radius: 5px 5px 15px 5px;
-}
-
 .message-ai > p {
-    text-align: left;
+
 }
 
 .message-ai > .message-header > p {
+    align-self: start;
     color: var(--tertiary);
-    text-align: right;
-    align-self: flex-end;
+    width: auto
 }
 
 .message-ai > .message-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
 }
 
 /*----------------- models -----------------------*/
@@ -743,6 +739,7 @@ header > h1 {
 
 .dark-mode .chat-box, .dark-mode .prompt-chat_textarea {
     background-color: var(--dm-neutral);
+    box-shadow: 0 -10px 30px 0 rgba(0, 0, 0, 0.3);
 }
 
 .dark-mode .menu-title:hover, .dark-mode .model-list__description {
@@ -772,10 +769,6 @@ header > h1 {
 }
 
 .dark-mode .models-header {
-    border-bottom: 1px solid var(--dm-border-color);
-}
-
-.dark-mode .message-header > p{
     border-bottom: 1px solid var(--dm-border-color);
 }
 
