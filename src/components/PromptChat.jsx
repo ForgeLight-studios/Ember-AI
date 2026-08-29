@@ -52,7 +52,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     async function sendMessage(newChatId, updatedMessages) {
         try {
-            const res = await fetch(url + "/ollama/newChat", {
+            const res = await fetch(url + "/ollama/sendMessage", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
