@@ -1,4 +1,4 @@
-export default function ChatList ({chats, currentChat, newChat, setCurrentChat, setActiveView}) {
+export default function ChatList ({chats, currentChat, newChat, setCurrentChat, setActiveView, setSelectedModel}) {
     const chatList = chats.map((chat) => {
         return(<p className={currentChat ? currentChat.id === chat.id ? "active-chat" : "chat" : "chat"} key={chat.id} onClick={() => {
             const newCurrentChat = () => {
@@ -14,7 +14,11 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat, 
     const isNewChat = chats.find(c => c.name === "New chat")
     return (
         <div className={"chat-list"}>
-                <p className={isNewChat ? "disabled-button" : "add-chat"} style={{fontWeight: 700}} onClick={newChat}>
+                <p className={isNewChat ? "disabled-button" : "add-chat"} style={{fontWeight: 700}} onClick={() => {
+                    newChat()
+                    setSelectedModel({})
+                }}
+                    >
                     + New Chat
                 </p>
                 {chatList}

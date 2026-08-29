@@ -4,18 +4,28 @@ import Message from "./Message.jsx";
 import {nanoid} from "nanoid";
 
 
-export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat, setChats, chats, newChat, setCurrentChat}) {
+export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat,
+                                   setChats, chats, newChat, setCurrentChat, selectedModel,
+                                   setSelectedModel}) {
+
+    useEffect(() => {
+        if (!selectedModel?.name && models.length > 0) {
+            setSelectedModel(models[0]);
+        }
+    }, [models]);
+
     const messageRef = useRef(null);
     const textAreaRef = useRef(null);
     // const messagesInChat = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages ?? [];
     const [currentMessage, setCurrentMessage] = useState({
-        text: "",
-        sender: "user",
+        content: "",
+        role: "user",
         id: nanoid()
     })
 
-    const [selectedModel, setSelectedModel] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+    // const [messages, setMessages] = useState(chats.find(c => c && c.id === currentChat?.id)?.messages ?? []);
+    const messages = chats.find(c => c && c.id === currentChat?.id)?.messages ?? [];
     const modelOptions = models.filter((model) => model.status !== "failed").map((m) => {
         return {
             label: m.name, value: m
@@ -23,26 +33,24 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     })
 
     useEffect(() => {
-        if (!selectedModel?.name && modelOptions.length > 0) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setSelectedModel(modelOptions[0].value);
-        }
-    }, [models]);
+        console.log("Chats: " + JSON.stringify(chats, null, 2));
+        console.log("Current messages: " + JSON.stringify(currentChat, null, 2));
+    }, [chats])
 
     useEffect(() => {
         messageRef.current?.scrollIntoView({behavior: "smooth"});
         textAreaRef.current?.focus()
     }, [chats])
 
-    const messageList = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages.map((message, index) => {
-        const length = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages.length;
+    const messageList = messages?.map((message, index) => {
+        const length = messages.length;
         const isLast = index === length-1
         return (
-            <Message text={message.text} key={message.id} user={message.sender} latestMessageRef={messageRef} isLast={isLast} assistant={message.assistant}/>
+            <Message text={message.content} key={message.id} user={message.role} latestMessageRef={messageRef} isLast={isLast} assistant={message.assistant}/>
         )
     })
 
-    async function sendMessage(newChatId) {
+    async function sendMessage(newChatId, updatedMessages) {
         try {
             const res = await fetch(url + "/ollama/newChat", {
                 method: "POST",
@@ -51,7 +59,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                 },
                 body: JSON.stringify({
                     model: selectedModel.name,
-                    message: currentMessage.text,
+                    messages: updatedMessages,
                 })
             });
 
@@ -68,7 +76,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     if (c.id === newChatId) {
                         return {
                             ...c,
-                            messages: [...c.messages, {text: resData.reply, sender: "assistant", id: nanoid(), assistant: selectedModel.name}]
+                            messages: [...c.messages, {content: resData.reply, role: "assistant", id: nanoid(), assistant: selectedModel.name}]
                         }
                     }
                     return c
@@ -76,6 +84,13 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             })
         } catch (e) {
             console.error(JSON.stringify(e.message))
+            handleNotification("error", "Could not reach the model");
+            setChats(prev => prev.map(c =>
+                c.id === newChatId
+                    ? { ...c, messages: c.messages.slice(0, -1) }   // drop the last message, immutably
+                    : c
+            ));
+            messages.slice(0, -1)
         }
     }
 
@@ -86,11 +101,11 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         setCurrentMessage((prevState) => {
             return {
                 ...prevState,
-                text: "",
+                content: "",
                 id: nanoid()
             }
         })
-        if (currentMessage.text === "" || !selectedModel?.name) {
+        if (currentMessage.content === "" || !selectedModel?.name) {
             handleNotification("error", "Please select a model or add a message")
             return;
         }
@@ -101,24 +116,26 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             chatId = currentChat.id
         }
 
+        const updatedMessages = [...messages, newMessage];
+
         setChats((prevState) => {
             return prevState.map((c) => {
                 if (c.id === chatId) {
                     return {
                         ...c,
-                        messages: [...c.messages, newMessage],
-                        name: newMessage.text.slice(0, 20).trim()
+                        messages: updatedMessages,
+                        name: newMessage.content.slice(0, 20).trim()
                     }
                 }
                 return c
             })
         })
 
-        await sendMessage(chatId)
+        await sendMessage(chatId, updatedMessages)
         setCurrentChat(prevState => {
             return {
                 ...prevState,
-                name: currentMessage.text.slice(0, 20).trim()
+                name: currentMessage.content.slice(0, 20).trim()
             }
         })
     }
@@ -141,23 +158,24 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                           placeholder={"Write a message..."}
                           onFocus={() => setIsTyping( true)}
                           onBlur={() => setIsTyping(false)}
-                          value={currentMessage.text}
+                          value={currentMessage.content}
                           ref={textAreaRef}
                           onKeyDown={(e) => {
                               if (e.key === "Enter" && !e.shiftKey) {
-                                  e.preventDefault();      // stop the newline
-                                  onSubmit(e);             // submit instead
+                                  e.preventDefault();
+                                  onSubmit(e);
                               }
                           }}
                           onChange={(e) => {
                               setCurrentMessage((prev) => ({
                                   ...prev,
-                                  text: e.target.value,
+                                  content: e.target.value,
                               }))
                           }}
                 ></textarea>
                 <div className={"chat-action-buttons"}>
                     <Select options={modelOptions}
+                            isDisabled={messages.length > 0}
                             value={modelOptions.find(o => o.value.name === selectedModel?.name) ?? null}
                             styles={{
                         container: (base, state) => ({

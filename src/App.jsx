@@ -12,7 +12,11 @@ export default function App() {
     const [models, setModels] = useState([]);
     const [chats, setChats] = useState([]);
     const [currentChat, setCurrentChat] = useState({id: "", name: ""});
+    const [selectedModel, setSelectedModel] = useState({});
 
+    useEffect(() => {
+        console.log("SELECTED MODEL: " + JSON.stringify(selectedModel, null, 2));
+    }, [selectedModel]);
 
     const [notification, setNotification] = useState([]);
     function handleNotification(type, message) {
@@ -41,7 +45,7 @@ export default function App() {
         console.log("creating a New chat");
         if (currentChat.name === "New chat") return
         const chatId = nanoid()
-        const newChat = { id: chatId, name: "New chat", messages: []};
+        const newChat = { id: chatId, name: "New chat", model: selectedModel ,messages: []};
         setChats(prev => [...prev, newChat]);
         setCurrentChat(newChat);
         return chatId
@@ -301,14 +305,16 @@ export default function App() {
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
                     currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
-                    handleNotification={handleNotification} apiCallHelper={apiCallHelper} setChats={setChats} />
+                    handleNotification={handleNotification} apiCallHelper={apiCallHelper}
+                    setChats={setChats} setSelectedModel={setSelectedModel} />
             <section className={"main-page"}>
                 {(activeView === "Chat") && <p className={"chat-name"}>{currentChat?.name}</p>}
                 {activeView === "Chat"  && <PromptChat models={models} setModels={setModels}
                                                       isDarkMode={isDarkMode} url={api_url}
                                                       handleNotification={handleNotification} setChats={setChats} chats={chats}
                                                       currentChat={currentChat} setCurrentChat={setCurrentChat}
-                                                       apiCallHelper={apiCallHelper} newChat={newChat}/>}
+                                                       apiCallHelper={apiCallHelper} newChat={newChat} selectedModel={selectedModel}
+                                                       setSelectedModel={setSelectedModel} />}
                 {activeView === "Models" && <Models models={models} setModels={setModels}
                                                     api_url={api_url} pullModel={pullModel}
                                                     status={status} progress={progress}
