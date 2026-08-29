@@ -16,7 +16,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     const messageRef = useRef(null);
     const textAreaRef = useRef(null);
-    // const messagesInChat = chats.find((chat) => chat && chat.id === currentChat?.id)?.messages ?? [];
     const [currentMessage, setCurrentMessage] = useState({
         content: "",
         role: "user",
@@ -24,7 +23,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     })
 
     const [isTyping, setIsTyping] = useState(false);
-    // const [messages, setMessages] = useState(chats.find(c => c && c.id === currentChat?.id)?.messages ?? []);
     const messages = chats.find(c => c && c.id === currentChat?.id)?.messages ?? [];
     const modelOptions = models.filter((model) => model.status !== "failed").map((m) => {
         return {
@@ -82,7 +80,9 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     return c
                 })
             })
+            return true
         } catch (e) {
+            return false
             console.error(JSON.stringify(e.message))
             handleNotification("error", "Could not reach the model");
             setChats(prev => prev.map(c =>
@@ -90,7 +90,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     ? { ...c, messages: c.messages.slice(0, -1) }   // drop the last message, immutably
                     : c
             ));
-            messages.slice(0, -1)
         }
     }
 
@@ -98,13 +97,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         let chatId
         e.preventDefault();
         const newMessage = currentMessage
-        setCurrentMessage((prevState) => {
-            return {
-                ...prevState,
-                content: "",
-                id: nanoid()
-            }
-        })
+
         if (currentMessage.content === "" || !selectedModel?.name) {
             handleNotification("error", "Please select a model or add a message")
             return;
@@ -131,7 +124,18 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             })
         })
 
-        await sendMessage(chatId, updatedMessages)
+        const didMessageSend = await sendMessage(chatId, updatedMessages)
+
+        if (didMessageSend) {
+            setCurrentMessage((prevState) => {
+                return {
+                    ...prevState,
+                    content: "",
+                    id: nanoid()
+                }
+            })
+        }
+
         setCurrentChat(prevState => {
             return {
                 ...prevState,

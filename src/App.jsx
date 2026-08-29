@@ -45,7 +45,7 @@ export default function App() {
         console.log("creating a New chat");
         if (currentChat.name === "New chat") return
         const chatId = nanoid()
-        const newChat = { id: chatId, name: "New chat", model: selectedModel ,messages: []};
+        const newChat = { id: chatId, name: "New chat"};
         setChats(prev => [...prev, newChat]);
         setCurrentChat(newChat);
         return chatId
@@ -80,10 +80,6 @@ export default function App() {
         try {
             const response = await fetch(fullUrl, fetchObject)
 
-            if (!response) {
-                handleNotification("error", `Unsupported method: ${type}`);
-                return { success: false };
-            }
             const resData = await response.json();
             if (!response.ok) {
                 handleNotification("error", `Could not perform request, reason:\n${resData.reason}`)
@@ -274,17 +270,17 @@ export default function App() {
         }
     }
 
-    const savedTheme = JSON.parse(localStorage.getItem("theme"));
-    !savedTheme && localStorage.setItem("theme", JSON.stringify({
-        name: "Sparkr Original",
-        colour: {
-            secondary: "#FF8C42",
-            tertiary: "#CC5803",
-            secondary75: "#FF8C4275",
-            tertiary75: "#CC580375",
-        }
-    }));
     useEffect(() => {
+        const savedTheme = JSON.parse(localStorage.getItem("theme"));
+        !savedTheme && localStorage.setItem("theme", JSON.stringify({
+            name: "Sparkr Original",
+            colour: {
+                secondary: "#FF8C42",
+                tertiary: "#CC5803",
+                secondary75: "#FF8C4275",
+                tertiary75: "#CC580375",
+            }
+        }));
         if (savedTheme) {
             document.documentElement.style.setProperty("--secondary", savedTheme.colour.secondary);
             document.documentElement.style.setProperty("--tertiary", savedTheme.colour.tertiary);
@@ -309,7 +305,7 @@ export default function App() {
                     setChats={setChats} setSelectedModel={setSelectedModel} />
             <section className={"main-page"}>
                 {(activeView === "Chat") && <p className={"chat-name"}>{currentChat?.name}</p>}
-                {activeView === "Chat"  && <PromptChat models={models} setModels={setModels}
+                {activeView === "Chat"  && <PromptChat models={models}
                                                       isDarkMode={isDarkMode} url={api_url}
                                                       handleNotification={handleNotification} setChats={setChats} chats={chats}
                                                       currentChat={currentChat} setCurrentChat={setCurrentChat}
