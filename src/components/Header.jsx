@@ -10,7 +10,7 @@ import ChatList from "./ChatList.jsx";
 
 export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat,
                                     handleNotification, apiCallHelper, setChats,
-                                    setCurrentChat, newChat }) {
+                                    setCurrentChat, newChat, setSelectedModel }) {
 
     async function createNewChat() {
         try {
@@ -45,7 +45,7 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                 </div>
                 {isOpen && <ChatList chats={chats} currentChat={currentChat} createNewChat={createNewChat}
                                          setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
-                                         setActiveView={setActiveView} />}
+                                         setActiveView={setActiveView} setSelectedModel={setSelectedModel} />}
                 <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen} setActiveView={setActiveView}/>
                 <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Themes"} isMenuOpen={isOpen} setActiveView={setActiveView}/>
             </div>

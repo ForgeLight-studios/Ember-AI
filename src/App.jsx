@@ -45,10 +45,10 @@ export default function App() {
         console.log("creating a New chat");
         if (currentChat.name === "New chat") return
         const chatId = nanoid()
-        const newChat = { id: chatId, name: "New chat"};
+        const newChat = { id: chatId, name: "New chat", model: selectedModel.name};
         setChats(prev => [...prev, newChat]);
         setCurrentChat(newChat);
-        return chatId
+        return newChat
     }
 
     async function apiCallHelper(route, type, params = null, body = null) {
@@ -119,13 +119,23 @@ export default function App() {
         didLoad.current = true;
 
         async function loadModels() {
-            handleNotification("notice", "Loading models")
             const resData = await apiCallHelper("model/allmodels", "GET");
+            if (resData.models) handleNotification("notice", "loaded models")
             if (resData.success) {
                 setModels(resData.models);
             }
         }
+
+        async function loadChats() {
+            const resData = await apiCallHelper("chats/getAllChats", "GET");
+            if (resData.chats.length > 0) handleNotification("notice", "loaded chats")
+            if (resData.success) {
+                setChats(resData.chats);
+                console.log("Pulled Chats" + JSON.stringify(resData.chats, null, 2));
+            }
+        }
         loadModels()
+        loadChats()
     }, [])
 
     useEffect(() => {
