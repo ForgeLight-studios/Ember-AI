@@ -12,9 +12,11 @@ Ember AI is a management layer and chat interface for locally hosted language mo
 
 Current features:
 
-- **Chat interface**: pick an installed model and chat with it. Messages are sent to the backend's `/ollama/newChat` endpoint and the model's reply is rendered in the conversation view. Assistant messages are labelled with the name of the model that produced them
+- **Chat interface**: pick an installed model and chat with it. The full conversation is sent to the backend's `/ollama/sendMessage` endpoint, so the model has context from earlier turns, and the reply is rendered in the conversation view. Assistant messages are labelled with the name of the model that produced them
+- **Chat and message persistence**: chats and their messages are saved to the database as they happen, and loaded back on startup, so conversations survive a reload
 - **Chat management**: create new chats from the side menu, with the active chat tracked in app state. Each message is appended to the correct chat by id
 - **Model management**: add a model by name and description, which triggers a pull from the Ollama registry with a live streaming progress bar, then lists the models available to use along with their status (`pulling`, `installed`, `failed`)
+- **Model locking per chat**: the model picker defaults to the first available model and locks once a chat has messages, so a conversation stays with one model
 - **Notifications**: a transient, stacked notification system (with nanoid IDs and CSS transitions) surfaces successes and errors from API calls
 - **Theme system** with a set of built-in colour palettes, saved to persistent storage
 - **Light and dark mode**, with automatic detection of your system preference on first load
@@ -24,15 +26,13 @@ Current features:
 
 Ember AI is under active development. Planned additions include:
 
-- **User login and accounts** with persistent server-side storage, so settings and history follow the user rather than the browser
-- **Chat history persistence** backed by the database, so conversations survive a reload (the backend schema and a `getAllChats` endpoint already support chats and messages; the frontend needs to load and hydrate from it)
-- **Conversation memory**, so prior turns are sent to the model rather than each message being treated as a fresh chat
+- **User login**
 - **Support for model backends beyond Ollama**
 - **Skills**: extensible capabilities the agent can call on
 - **Browser access**: letting the agent read from and act on web pages
 - **Bash environment access**: letting the agent run commands in a controlled shell
 
-The near-term focus is memory management and smooth switching between locally hosted Ollama models. The longer-term aim is a fuller self-hosted agent workspace.
+The near-term focus is smooth switching between locally hosted Ollama models and a solid chat-history experience. The longer-term aim is a fuller self-hosted agent workspace.
 
 ## Tech stack
 
@@ -102,9 +102,11 @@ ember-ai/
 
 ## How it works
 
-The app shell in `App.jsx` manages which view is active (Home, Models, or Themes) and renders the matching component. A collapsible side menu drives navigation. `App.jsx` also holds the shared `apiCallHelper` used for talking to the backend, the notification state, the chat state (`chats` and `currentChat`), and the model-pulling logic.
+The app shell in `App.jsx` manages which view is active (Chat, Models, or Themes) and renders the matching component. A collapsible side menu drives navigation. `App.jsx` also holds the shared `apiCallHelper` used for talking to the backend, the notification state, the chat state (`chats` and `currentChat`), the selected model, and the model-pulling logic. On startup it loads both the installed models (`GET /model/allmodels`) and the saved chats (`GET /chats/getAllChats`), so history is restored when the app opens.
 
-**Chat** lives in `PromptChat.jsx`. It renders a model picker (via react-select) populated from the loaded models, and a message box. On send it validates that both a message and a model are selected, appends the user message to the current chat, POSTs the chosen model and message to `/ollama/newChat`, and appends the reply to the same chat by id. The chat being written to is resolved once up front (creating a new chat if needed) and that id is threaded through the whole send, so the user message and the reply always land in the same chat rather than reading chat state back mid-handler. Note that there is currently no conversation memory: only the single current message is sent to the model, with no prior turns included, so every message is effectively treated as a brand new chat and the model has no recollection of anything said before it.
+**Chat** lives in `PromptChat.jsx`. It renders a model picker (via react-select) populated from the loaded models, and a message box. On send it validates that both a message and a model are selected, resolves the target chat once up front (creating one if needed), appends the user message to that chat, and POSTs the full message history to `/ollama/sendMessage` so the model has prior context. The chat id is threaded through the whole send, so the user message and the reply always land in the same chat rather than reading chat state back mid-handler. The user and assistant messages are persisted to the database via `POST /chats/createMessage`, and a failed send rolls the optimistic message back out of view.
+
+**Persistence.** New chats are created via `POST /chats/createChat` and messages via `POST /chats/createMessage`; the chat must be created before its first message, since the backend enforces a foreign key from message to chat. Saved chats are loaded on startup and hydrated into state, so conversations survive a reload.
 
 **New chats** are created from the side menu (`ChatList.jsx`). Creating a chat generates a nanoid id, adds it to `chats`, and sets it as the current chat. The newly created chat object is used directly rather than searched for in state immediately after creation, since state updates are not applied synchronously.
 
@@ -118,19 +120,20 @@ The app shell in `App.jsx` manages which view is active (Home, Models, or Themes
 
 ## Recent fixes
 
-- **Messages can no longer be sent without a selected model.** The send guard now checks the selected model has a valid name, not just that a model object is present.
-- **Assistant name now displays on AI messages.** A backwards ternary was passing an empty string in place of the model name; the value is now passed through to the message bubble.
-- **Send flow writes to the correct chat.** The target chat id is resolved once and reused for both the user message and the reply, fixing replies landing in the wrong chat (or not appearing) after creating a new chat.
-- **"+ New Chat" no longer calls its handler on every render.** The handler is passed by reference rather than invoked during render.
-- **The chat list now collapses when the menu is closed.** Closing the side menu also collapses the chat list rather than leaving it open.
-- **"+ New Chat" disable logic widened.** The button is now disabled when any chat is an unused "New chat", rather than only when the current chat is, preventing multiple empty "New chat" entries.
+- **Chat and message persistence with startup hydration.** Chats and messages are saved to the database as they happen and loaded back on startup, so conversations survive a reload.
+- **Conversation memory.** The full message history is now sent to the model, so it has context from earlier turns rather than treating each message as a fresh chat.
+- **Model auto-select and per-chat locking.** The picker defaults to the first available model and locks once a chat has messages.
+- **Send on Enter** in the message box (Shift+Enter for a newline).
+- **Fixed `apiCallHelper` misuse** where the response was parsed twice (`.json()` on an already-parsed object), which was throwing and silently dropping loaded chats.
+- **Assistant name displays on AI messages**, and messages write to the correct chat via a single resolved chat id threaded through the send.
+- **"+ New Chat"** no longer fires on every render, collapses with the menu, and is disabled when an unused "New chat" already exists.
 
 ## Known issues
 
-- **No conversation memory.** Each message is sent on its own with no prior context, so the model does not remember earlier turns in the same chat.
+- **Foreign-key error when sending the first message in an explicitly-created chat.** Creating a chat via "+ New Chat" and then sending can fail to persist that first message, because the chat row is not always inserted before the message references it. Typing into the empty chat window on load persists correctly.
 
 ## Status
 
-Early and evolving. The core loop now works end to end against the backend: you can add and pull an Ollama model, watch its progress, create chats, and chat with an installed model with the model's name shown on its replies. What is still missing is persistence beyond the browser (no accounts yet, and chat history is not yet loaded back from the database on reload), conversation memory, and the broader agent features on the roadmap.
+Early and evolving. The core loop works end to end against the backend: you can add and pull an Ollama model, watch its progress, chat with an installed model with conversation context and the model's name on its replies, and have chats and messages persist across reloads. What is still missing is accounts and server-side per-user storage, the foreign-key edge case noted above, and the broader agent features on the roadmap.
 
 Interfaces, storage, and structure are still changing as the project grows from a UI prototype toward a fuller self-hosted agent workspace. Expect breaking changes between versions for now.
