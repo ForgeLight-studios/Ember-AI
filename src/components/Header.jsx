@@ -9,7 +9,7 @@ import chatImageLight from "../assets/chats-icon-light.svg";
 import ChatList from "./ChatList.jsx";
 
 export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat,
-                                    handleNotification, apiCallHelper, setChats, models,
+                                    handleNotification, apiCallHelper, setChats, models, activeView,
                                     setCurrentChat, newChat, setSelectedModel }) {
 
     async function createNewChat() {
@@ -36,18 +36,21 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                 {toggleTitle && <h1>Ember AI</h1>}
             </div>
             <div className={"menu-item-list"}>
-                <div title={"Chats"} className="menu-item" onClick={() => {
+                <div title={"Chats"} className={activeView === "Chats" ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
                     setIsOpen(true)
-                    setActiveView("Chat");
+                    setActiveView("Chats");
                 }}>
                     <img style={isOpen ? {width: "30px", height: "30px"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"} />
                     {isOpen && <p>{"Chats"}</p>}
                 </div>
                 {isOpen && <ChatList chats={chats} currentChat={currentChat} createNewChat={createNewChat}
                                          setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
-                                         setActiveView={setActiveView} setSelectedModel={setSelectedModel} models={models}/>}
-                <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen} setActiveView={setActiveView}/>
-                <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Themes"} isMenuOpen={isOpen} setActiveView={setActiveView}/>
+                                         setActiveView={setActiveView} setSelectedModel={setSelectedModel} models={models}
+                                         activeView={activeView}/>}
+                <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
+                          setActiveView={setActiveView} activeView={activeView}/>
+                <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Themes"} isMenuOpen={isOpen}
+                          setActiveView={setActiveView} activeView={activeView}/>
             </div>
         </div>
     )

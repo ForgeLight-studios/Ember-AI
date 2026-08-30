@@ -388,7 +388,7 @@ header > h1 {
     transition: background-color 0.2s ease-in-out;
 }
 
-.menu-item:hover {
+.menu-item:hover, .menu-item__selected {
     background-color: var(--secondary-75);
 }
 

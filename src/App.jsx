@@ -100,7 +100,7 @@ export default function App() {
     });
     const [status, setStatus] = useState("Starting");
     const [isModelPulling, setIsModelPulling] = useState(false);
-    const [activeView, setActiveView] = useState("Chat");
+    const [activeView, setActiveView] = useState("Chats");
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -312,10 +312,11 @@ export default function App() {
                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
                     currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
                     handleNotification={handleNotification} apiCallHelper={apiCallHelper}
-                    setChats={setChats} setSelectedModel={setSelectedModel} models={models}/>
+                    setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
+                    models={models}/>
             <section className={"main-page"}>
-                {(activeView === "Chat") && <p className={"chat-name"}>{currentChat?.name}</p>}
-                {activeView === "Chat"  && <PromptChat models={models}
+                {(activeView === "Chats") && <p className={"chat-name"}>{currentChat?.name}</p>}
+                {activeView === "Chats"  && <PromptChat models={models}
                                                       isDarkMode={isDarkMode} url={api_url}
                                                       handleNotification={handleNotification} setChats={setChats} chats={chats}
                                                       currentChat={currentChat} setCurrentChat={setCurrentChat}
