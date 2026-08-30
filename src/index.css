@@ -483,6 +483,13 @@ header > h1 {
     box-shadow: 1px 1px 2px var(--secondary-75);
 }
 
+.message-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
 .message-header > p {
     color: var(--tertiary);
     font-weight: bold;
@@ -523,9 +530,17 @@ header > h1 {
     }
 }
 
+
+
 .message-user {
     align-self: end;
     border-radius: 5px 5px 5px 15px;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
 }
 
 .message-ai > .message-header > p {
@@ -536,9 +551,14 @@ header > h1 {
 
 .message-ai > .message-header {
     display: flex;
-    justify-content: flex-start;
 }
 
+.failedMessage {
+    text-align: right;
+    color: var(--secondary);
+    font-size: 12px;
+    margin: 3px 0 0 0;
+}
 /*----------------- models -----------------------*/
 
 .models-container {

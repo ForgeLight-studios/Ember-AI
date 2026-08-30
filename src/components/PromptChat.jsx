@@ -15,11 +15,15 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     function resetMessageOnFail (newChatId) {
         handleNotification("error", "Could not reach the model");
-        setChats(prev => prev.map(c =>
-            c.id === newChatId
-                ? { ...c, messages: c.messages.slice(0, -1) }   // drop the last message, immutably
-                : c
-        ));
+        setChats(prev => prev.map(c => {
+            if (c.id !== newChatId) return c;                 // leave other chats untouched
+            const lastIndex = c.messages.length - 1;         // last message's index
+            const updatedMessages = c.messages.map((m, i) =>
+                i === lastIndex ? { ...m, failed: true } : m // replace just the last one
+            );
+            setCurrentMessage({content: "", role: "user", id: nanoid()})
+            return { ...c, messages: updatedMessages };
+        }))
     }
 
     const messageRef = useRef(null);
@@ -52,32 +56,24 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         const length = messages.length;
         const isLast = index === length-1
         return (
-            <Message text={message.content} key={message.id} user={message.role} latestMessageRef={messageRef} isLast={isLast} assistant={selectedModel.name}/>
+            <Message failed={message?.failed} text={message.content} key={message.id} user={message.role} latestMessageRef={messageRef} isLast={isLast} assistant={selectedModel.name}/>
         )
     })
 
-    function updateChats(didMessageSend = null, chat, newMessage) {
+    function updateChats(chat, newMessage) {
         setChats((prevState) => {
             return prevState.map((c) => {
                 if (c.id === chat.id) {
                     return {
                         ...c,
-                        messages: [...c.messages, newMessage],
+                        messages: [...c.messages, {...newMessage, failed: false}],
                         name: chat.name
                     }
                 }
                 return c
             })
         })
-        if (didMessageSend) {
-            setCurrentMessage((prevState) => {
-                return {
-                    ...prevState,
-                    content: "",
-                    id: nanoid()
-                }
-            })
-        }
+        setCurrentMessage({content: "", role: "user", id: nanoid()})
     }
 
     async function sendMessage(chat, newMessage) {
@@ -93,21 +89,17 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     model: selectedModel.name,
                 })
             });
-
             const resData = await res.json();
-
             if (!resData.success) {
                 handleNotification("error", "Model Contact failed: " + res.reason);
                 return
             }
-
             const assistantResponse = {content: resData.reply, role: "assistant", id: nanoid(), assistant: selectedModel.name, chat_id: chat.id}
-
             try{
                 const userMessageRes = await apiCallHelper("chats/createMessage", "POST", null, newMessage);
-                if (!userMessageRes.success) return
+                if (!userMessageRes.success) return {success: false}
                 const assistantMessageRes = await apiCallHelper("chats/createMessage", "POST", null, assistantResponse);
-                if (!assistantMessageRes.success) return
+                if (!assistantMessageRes.success) return {success: false}
                 return {
                     assistantResponse: assistantResponse,
                     success: true
@@ -117,7 +109,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             }
         } catch (e) {
             console.error(JSON.stringify(e.message))
-            resetMessageOnFail(chat.id)
             return false
         }
     }
@@ -129,7 +120,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             handleNotification("error", "Please select a model or add a message")
             return;
         }
-
         if (currentChat.name === "" && currentChat.id === "") {
             chat = {...newChat(), name: currentMessage.content.slice(0, 20).trim()}
         } else if(currentChat.name === "New chat") {
@@ -143,7 +133,9 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             try {
                 const response = await apiCallHelper("chats/createChat",
                     "POST", null, {id: chat.id, title: chat.name, model: chat.model})
-                if (!response.success) return false
+                if (!response.success) {
+                    return false
+                }
             } catch(e) {
                 console.log(JSON.stringify(e, null, 2));
                 handleNotification("error", "Could not store the new chat");
@@ -152,17 +144,17 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         }
 
         const didMessageSend = await sendMessage(chat, {...currentMessage, chat_id: chat.id});
-        updateChats(didMessageSend.success, chat, currentMessage)
+        updateChats(chat, currentMessage)
         setCurrentChat(prevState => {
             return {
                 ...prevState,
                 name: chat.name
             }
         })
-        updateChats(null, chat, didMessageSend.assistantResponse)
-        }
+        if (!didMessageSend) resetMessageOnFail(chat.id)
 
-
+        if (didMessageSend.success) updateChats(chat, didMessageSend.assistantResponse)
+    }
 
     return (
         <>
