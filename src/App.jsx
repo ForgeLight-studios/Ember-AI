@@ -45,7 +45,7 @@ export default function App() {
         console.log("creating a New chat");
         if (currentChat.name === "New chat") return
         const chatId = nanoid()
-        const newChat = { id: chatId, name: "New chat", model: selectedModel.name};
+        const newChat = { id: chatId, name: "New chat", model: selectedModel.name, messages: []};
         setChats(prev => [...prev, newChat]);
         setCurrentChat(newChat);
         return newChat
@@ -312,7 +312,7 @@ export default function App() {
                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
                     currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
                     handleNotification={handleNotification} apiCallHelper={apiCallHelper}
-                    setChats={setChats} setSelectedModel={setSelectedModel} />
+                    setChats={setChats} setSelectedModel={setSelectedModel} models={models}/>
             <section className={"main-page"}>
                 {(activeView === "Chat") && <p className={"chat-name"}>{currentChat?.name}</p>}
                 {activeView === "Chat"  && <PromptChat models={models}

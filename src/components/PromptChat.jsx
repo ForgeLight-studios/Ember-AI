@@ -56,7 +56,31 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         )
     })
 
-    async function sendMessage(newChatId, updatedMessages, newMessage) {
+    function updateChats(didMessageSend = null, chat, newMessage) {
+        setChats((prevState) => {
+            return prevState.map((c) => {
+                if (c.id === chat.id) {
+                    return {
+                        ...c,
+                        messages: [...c.messages, newMessage],
+                        name: chat.name
+                    }
+                }
+                return c
+            })
+        })
+        if (didMessageSend) {
+            setCurrentMessage((prevState) => {
+                return {
+                    ...prevState,
+                    content: "",
+                    id: nanoid()
+                }
+            })
+        }
+    }
+
+    async function sendMessage(chat, newMessage) {
         console.log("Sending message...")
         try {
             const res = await fetch(url + "/ollama/sendMessage", {
@@ -65,7 +89,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    messages: updatedMessages,
+                    messages: [...messages, newMessage],
                     model: selectedModel.name,
                 })
             });
@@ -77,43 +101,30 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                 return
             }
 
-            const assistantResponse = {content: resData.reply, role: "assistant", id: nanoid(), assistant: selectedModel.name, chat_id: newChatId}
+            const assistantResponse = {content: resData.reply, role: "assistant", id: nanoid(), assistant: selectedModel.name, chat_id: chat.id}
 
             try{
                 const userMessageRes = await apiCallHelper("chats/createMessage", "POST", null, newMessage);
                 if (!userMessageRes.success) return
                 const assistantMessageRes = await apiCallHelper("chats/createMessage", "POST", null, assistantResponse);
                 if (!assistantMessageRes.success) return
+                return {
+                    assistantResponse: assistantResponse,
+                    success: true
+                };
             } catch (e){
                 handleNotification("error", `Internal Server error sending message ${e}`)
-                return
             }
-            console.log("BOT RESPONSE: " + JSON.stringify(assistantResponse, null, 2));
-            setChats((prevState) => {
-                return prevState.map((c) => {
-                    if (c.id === newChatId) {
-                        return {
-                            ...c,
-                            messages: [...c.messages, assistantResponse]
-                        }
-                    }
-                    return c
-                })
-            })
-            return true
         } catch (e) {
             console.error(JSON.stringify(e.message))
-            resetMessageOnFail(newChatId)
+            resetMessageOnFail(chat.id)
             return false
         }
     }
 
     async function onSubmit(e) {
         e.preventDefault();
-        let chat = {
-            name: currentMessage.content.slice(0, 20).trim()
-        }
-
+        let chat
         if (currentMessage.content === "" || !selectedModel?.name) {
             handleNotification("error", "Please select a model or add a message")
             return;
@@ -140,40 +151,18 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             }
         }
 
-        const updatedMessages = [...messages, currentMessage];
-
-        setChats((prevState) => {
-            return prevState.map((c) => {
-                if (c.id === chat.id) {
-                    return {
-                        ...c,
-                        messages: updatedMessages,
-                        name: chat.name
-                    }
-                }
-                return c
-            })
-        })
-
-        const didMessageSend = await sendMessage(chat.id, updatedMessages, {...currentMessage, chat_id: chat.id})
-
-        if (didMessageSend) {
-            setCurrentMessage((prevState) => {
-                return {
-                    ...prevState,
-                    content: "",
-                    id: nanoid()
-                }
-            })
-        }
-
+        const didMessageSend = await sendMessage(chat, {...currentMessage, chat_id: chat.id});
+        updateChats(didMessageSend.success, chat, currentMessage)
         setCurrentChat(prevState => {
             return {
                 ...prevState,
                 name: chat.name
             }
         })
-    }
+        updateChats(null, chat, didMessageSend.assistantResponse)
+        }
+
+
 
     return (
         <>
