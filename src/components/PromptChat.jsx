@@ -7,7 +7,6 @@ import {nanoid} from "nanoid";
 export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat,
                                    setChats, chats, newChat, setCurrentChat, selectedModel,
                                    setSelectedModel, apiCallHelper}) {
-
     useEffect(() => {
         if (!selectedModel?.name && models.length > 0) {
             setSelectedModel(models[0]);
@@ -111,7 +110,9 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     async function onSubmit(e) {
         e.preventDefault();
-        let chat
+        let chat = {
+            name: currentMessage.content.slice(0, 20).trim()
+        }
 
         if (currentMessage.content === "" || !selectedModel?.name) {
             handleNotification("error", "Please select a model or add a message")
@@ -119,18 +120,24 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         }
 
         if (currentChat.name === "" && currentChat.id === "") {
-            chat = newChat()
-            chat = {...chat, name: currentMessage.content.slice(0, 20).trim()}
+            chat = {...newChat(), name: currentMessage.content.slice(0, 20).trim()}
+        } else if(currentChat.name === "New chat") {
+            chat = {...currentChat, name: currentMessage.content.slice(0, 20).trim()}
+            console.log("Current Chat Object: " + JSON.stringify(chat, null, 2))
+        } else {
+            chat = currentChat
+        }
+
+        if (messages.length === 0) {
             try {
-                const response = await apiCallHelper("chats/createChat", "POST", null, {id: chat.id, title: chat.name, model: chat.model})
+                const response = await apiCallHelper("chats/createChat",
+                    "POST", null, {id: chat.id, title: chat.name, model: chat.model})
                 if (!response.success) return false
             } catch(e) {
                 console.log(JSON.stringify(e, null, 2));
                 handleNotification("error", "Could not store the new chat");
                 return;
             }
-        } else {
-            chat = currentChat
         }
 
         const updatedMessages = [...messages, currentMessage];
@@ -206,7 +213,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                             isDisabled={messages.length > 0}
                             value={modelOptions.find(o => o.value.name === selectedModel?.name) ?? null}
                             styles={{
-                        container: (base, state) => ({
+                        container: (base) => ({
                             ...base,
                             width: '40%',
                             outline: 'none'
