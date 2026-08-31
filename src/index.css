@@ -84,6 +84,11 @@ main {
     font-weight: bold;
     cursor: pointer;
     color: var(--text-primary);
+    background-color: var(--neutral);
+}
+
+.dark-mode .general-button {
+    background-color: var(--dm-neutral);
 }
 
 .general-button:hover {
@@ -125,6 +130,58 @@ main {
     pointer-events: none;
     cursor: not-allowed;
     opacity: 0.65;
+}
+
+.you-sure-wrapper{
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.you-sure-container {
+    border-bottom: 1px solid var(--secondary);
+    width: 40%;
+    border-radius: 10px;
+    background-color: var(--primary);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 10px 10px 10px var(--primary);
+}
+
+.dark-mode .you-sure-container {
+    box-shadow: 10px 10px 10px var(--dm-primary);
+    background-color: var(--dm-primary);
+}
+
+.you-sure-body {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% - 10px);
+    gap: 10px;
+}
+
+.you-sure-highlight {
+    font-weight: 700;
+    color: var(--tertiary);
+}
+
+.you-sure-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
 }
 
 /*-------------------- forms ---------------------*/
@@ -641,7 +698,19 @@ header > h1 {
     opacity: 0;
 }
 
+.model-list__wrapper {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 10px;
+}
 
+.dark-mode .model-list__wrapper {
+    border-bottom: 1px solid var(--dm-border-color);
+}
 
 .model-list__container {
     display: flex;

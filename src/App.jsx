@@ -6,6 +6,7 @@ import Models from "./components/Models.jsx";
 import Themes from "./components/Themes.jsx";
 import {nanoid} from "nanoid";
 import Notifications from "./components/Notifications.jsx";
+import AreYouSure from "../AreYouSure.jsx";
 
 export default function App() {
 
@@ -59,8 +60,8 @@ export default function App() {
             return { success: false };
         }
 
-        const allowedTypes = ["POST", "PATCH", "DELETE"];
-        const needsBody = allowedTypes.includes(type);
+        const typesForBody = ["POST", "PATCH", "DELETE"];
+        const needsBody = typesForBody.includes(type);
         if (needsBody && body === null) {
             handleNotification("error", "Internal error occurred");
             return { success: false };
@@ -269,7 +270,7 @@ export default function App() {
             setTimeout(() => {
                 setIsModelPulling(false);
             }, 3000)
-            const resData = await apiCallHelper("model/status", "PATCH", null, {name: addModel, status: "failed"});
+            await apiCallHelper("model/status", "PATCH", null, {name: addModel, status: "failed"});
             model.status = "failed";
             setModels((prevModels) =>
                 prevModels.map(m =>
@@ -304,9 +305,13 @@ export default function App() {
         }
     }, []);
 
-    return (
+    const [isAreYouSure, setIsAreYouSure] = useState(false);
+    const [areYouSureMessage, setAreaYouSureMessage] = useState("");
+    const [areYouSureFunction, setAreaYouSureFunction] = useState(null);
 
+    return (
         <main>
+            {isAreYouSure && <AreYouSure message={areYouSureMessage} yesFunction={areYouSureFunction} setIsAreYouSure={setIsAreYouSure}/>}
             <Notifications notification={notification} setNotification={setNotification} />
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
@@ -322,10 +327,10 @@ export default function App() {
                                                       currentChat={currentChat} setCurrentChat={setCurrentChat}
                                                        apiCallHelper={apiCallHelper} newChat={newChat} selectedModel={selectedModel}
                                                        setSelectedModel={setSelectedModel} />}
-                {activeView === "Models" && <Models models={models} setModels={setModels}
-                                                    api_url={api_url} pullModel={pullModel}
-                                                    status={status} progress={progress}
-                                                    isModelPulling={isModelPulling} apiCallHelper={apiCallHelper}/>}
+                {activeView === "Models" && <Models models={models} setModels={setModels} setAreaYouSureFunction={setAreaYouSureFunction}
+                                                    api_url={api_url} pullModel={pullModel} setAreaYouSureMessage={setAreaYouSureMessage}
+                                                    status={status} progress={progress} handleNotification={handleNotification}
+                                                    isModelPulling={isModelPulling} apiCallHelper={apiCallHelper} setIsAreYouSure={setIsAreYouSure}/>}
                 {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
             </section>
         </main>

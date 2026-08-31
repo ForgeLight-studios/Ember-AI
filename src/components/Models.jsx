@@ -1,7 +1,8 @@
 import {useEffect, useState} from "react";
 import ModelList from "./ModelList.jsx";
 
-export default function Models({models, status, progress, pullModel, isModelPulling}) {
+export default function Models({models, status, progress, pullModel, isModelPulling, apiCallHelper,
+                                   setModels, handleNotification, setAreaYouSureFunction, setAreaYouSureMessage, setIsAreYouSure}) {
 
 
     const [addModel, setAddModel] = useState("");
@@ -48,7 +49,9 @@ export default function Models({models, status, progress, pullModel, isModelPull
                     <div className={"progress-bar"}     style={isModelPulling ? { width: `${((progress.completed / 10000000) / (progress.total / 10000000)) * 100}%` } : {}}></div>
                 </div>
             </div>
-            <ModelList models={models}/>
+            <ModelList models={models} apiCallHelper={apiCallHelper} setModels={setModels}
+                       handleNotification={handleNotification} setAreaYouSureMessage={setAreaYouSureMessage}
+                       setAreaYouSureFunction={setAreaYouSureFunction} setIsAreYouSure={setIsAreYouSure}/>
         </div>
     )
 }
