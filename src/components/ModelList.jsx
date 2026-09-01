@@ -11,7 +11,11 @@ export default function ModelList({models, apiCallHelper, setModels, handleNotif
                             color: model.status === "failed" ? "var(--danger)" : model.status === "pulling" ? "orange" : "var(--success)"
                         }}>{model.status}</p>
                     </div>
-                    <p className={"model-list__description"}>{model.description ? model.description : "No Description"}</p>
+                    {editModels ?
+                        <input type={"text"} className={"model-list__description"} value={model.description ? model.description : "No Description"}/>
+                        :
+                        <p className={"model-list__description"}>{model.description ? model.description : "No Description"}</p>
+                    }
                 </div>
                 {editModels && <div style={{display: "flex", flexDirection: "column", justifyContent: "flex-end"}}>
                     <button style={{padding: "10px 15px", fontSize: "16px", margin: "0  0 17px 10px"}} className={"general-button danger-button"}
