@@ -119,25 +119,26 @@ export default function App() {
         if (didLoad.current) return;
         didLoad.current = true;
 
-        async function loadModels() {
-            const resData = await apiCallHelper("model/allmodels", "GET");
-            if (resData.models) handleNotification("notice", "loaded models")
-            if (resData.success) {
-                setModels(resData.models);
+        async function init() {
+            // 1. sync Ollama's installed models into the DB first
+            await apiCallHelper("ollama/checkInstalled", "GET");
+
+            // 2. then load models and chats from the DB
+            const modelsRes = await apiCallHelper("model/allmodels", "GET");
+            if (modelsRes.success) {
+                setModels(modelsRes.models);
+                if (modelsRes.models?.length) handleNotification("notice", "loaded models");
+            }
+
+            const chatsRes = await apiCallHelper("chats/getAllChats", "GET");
+            if (chatsRes.success) {
+                setChats(chatsRes.chats ?? []);
+                if (chatsRes.chats?.length) handleNotification("notice", "loaded chats");
             }
         }
 
-        async function loadChats() {
-            const resData = await apiCallHelper("chats/getAllChats", "GET");
-            if (resData.chats.length > 0) handleNotification("notice", "loaded chats")
-            if (resData.success) {
-                setChats(resData.chats);
-                console.log("Pulled Chats" + JSON.stringify(resData.chats, null, 2));
-            }
-        }
-        loadModels()
-        loadChats()
-    }, [])
+        init();
+    }, []);
 
     useEffect(() => {
         if (isDarkMode) {
