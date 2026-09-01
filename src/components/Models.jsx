@@ -7,6 +7,7 @@ export default function Models({models, status, progress, pullModel, isModelPull
 
     const [addModel, setAddModel] = useState("");
     const [addModelDescription, setAddModelDescription] = useState("");
+    const [editModels, setEditModels] = useState(false);
 
     useEffect(() => {
         console.log(JSON.stringify("STATUS: " + status));
@@ -51,7 +52,18 @@ export default function Models({models, status, progress, pullModel, isModelPull
             </div>
             <ModelList models={models} apiCallHelper={apiCallHelper} setModels={setModels}
                        handleNotification={handleNotification} setAreaYouSureMessage={setAreaYouSureMessage}
-                       setAreaYouSureFunction={setAreaYouSureFunction} setIsAreYouSure={setIsAreYouSure}/>
+                       setAreaYouSureFunction={setAreaYouSureFunction} setIsAreYouSure={setIsAreYouSure}
+                       editModels={editModels}/>
+            <div style={{display: "flex", flexDirection: "row", justifyContent: "flex-end",
+                        alignItems: "center", gap: "20px", marginTop: "10px"}}>
+                <button className={editModels ? "general-button danger-button"  : "general-button success-button"}  onClick={() => {
+                    setEditModels(prevState => !prevState);
+                }}>{editModels ? "Cancel" : "Edit"}</button>
+                {editModels && <button className={"general-button success-button"} onClick={() => {
+                    setModels(prevState => !prevState);
+                }}>Save</button>}
+            </div>
+
         </div>
     )
 }

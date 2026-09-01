@@ -3,7 +3,7 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat, 
         return(<p className={currentChat ? currentChat.id === chat.id ? "active-chat" : "chat" : "chat"} key={chat.id} onClick={() => {
             const newCurrentChat = chats.find(c => c.id === chat.id)
             setCurrentChat(newCurrentChat);
-            setActiveView("Chat");
+            setActiveView("Chats");
             const modelObj = models.find(m => m.name === newCurrentChat.model);
             setSelectedModel(modelObj ?? null);
             console.log("CHAT ITERATION FOR LIST: " + newCurrentChat )

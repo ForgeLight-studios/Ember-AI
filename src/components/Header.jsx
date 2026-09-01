@@ -40,7 +40,7 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                     setIsOpen(true)
                     setActiveView("Chats");
                 }}>
-                    <img style={isOpen ? {width: "30px", height: "30px"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"} />
+                    <img style={isOpen ? {width: "30px", height: "30px", cursor: "pointer"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"} />
                     {isOpen && <p>{"Chats"}</p>}
                 </div>
                 {isOpen && <ChatList chats={chats} currentChat={currentChat} createNewChat={createNewChat}

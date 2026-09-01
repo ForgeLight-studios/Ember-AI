@@ -172,7 +172,7 @@ export default function App() {
         }
         const resData = await apiCallHelper("model/create", "POST", null, {name: addModel, description: addModelDescription, status: "pulling"});
         model.status = "pulling"
-        setModels((prevModels) => [...prevModels, model]);
+        setModels((prevModels) => [model, ...prevModels]);
         console.log(JSON.stringify(resData));
         if (!resData.success) {
             handleNotification("error", `could not saveModel to database`);
@@ -312,7 +312,8 @@ export default function App() {
 
     return (
         <main>
-            {isAreYouSure && <AreYouSure message={areYouSureMessage} yesFunction={areYouSureFunction} setIsAreYouSure={setIsAreYouSure}/>}
+            {isAreYouSure && <AreYouSure message={areYouSureMessage} yesFunction={areYouSureFunction} setIsAreYouSure={setIsAreYouSure}
+                                         setAreYouSureMessage={setAreaYouSureMessage} setAreYouSureFunction={setAreaYouSureFunction} />}
             <Notifications notification={notification} setNotification={setNotification} />
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
