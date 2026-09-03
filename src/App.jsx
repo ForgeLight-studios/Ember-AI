@@ -211,7 +211,7 @@ export default function App() {
                 if (done) {
                     setStatus("Successfully retrieved!");
                     handleNotification("notify", `Model: ${addModel} has been installed successfully!`);
-                    const resData = await apiCallHelper("model/status", "PATCH", null, {name: addModel, status: "installed"});
+                    const resData = await apiCallHelper("model/patch", "PATCH", null, {name: addModel, attributeValue: "installed", attribute: "status"});
                     model.status = "installed"
                     setModels((prevModels) =>
                         prevModels.map(m =>
@@ -307,13 +307,19 @@ export default function App() {
     }, []);
 
     const [isAreYouSure, setIsAreYouSure] = useState(false);
-    const [areYouSureMessage, setAreaYouSureMessage] = useState("");
-    const [areYouSureFunction, setAreaYouSureFunction] = useState(null);
+    const [areYouSureMessage, setAreYouSureMessage] = useState("");
+    const [areYouSureFunction, setAreYouSureFunction] = useState(null);
+
+    function activateAreYouSure(message, func) {
+        setAreYouSureMessage(message);
+        setAreYouSureFunction(func);
+        setIsAreYouSure(true)
+    }
 
     return (
         <main>
             {isAreYouSure && <AreYouSure message={areYouSureMessage} yesFunction={areYouSureFunction} setIsAreYouSure={setIsAreYouSure}
-                                         setAreYouSureMessage={setAreaYouSureMessage} setAreYouSureFunction={setAreaYouSureFunction} />}
+                                         setAreYouSureMessage={setAreYouSureMessage} setAreYouSureFunction={setAreYouSureFunction} />}
             <Notifications notification={notification} setNotification={setNotification} />
             <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
@@ -329,10 +335,11 @@ export default function App() {
                                                       currentChat={currentChat} setCurrentChat={setCurrentChat}
                                                        apiCallHelper={apiCallHelper} newChat={newChat} selectedModel={selectedModel}
                                                        setSelectedModel={setSelectedModel} />}
-                {activeView === "Models" && <Models models={models} setModels={setModels} setAreaYouSureFunction={setAreaYouSureFunction}
-                                                    api_url={api_url} pullModel={pullModel} setAreaYouSureMessage={setAreaYouSureMessage}
+                {activeView === "Models" && <Models models={models} setModels={setModels} setAreYouSureFunction={setAreYouSureFunction}
+                                                    api_url={api_url} pullModel={pullModel} setAreYouSureMessage={setAreYouSureMessage}
                                                     status={status} progress={progress} handleNotification={handleNotification}
-                                                    isModelPulling={isModelPulling} apiCallHelper={apiCallHelper} setIsAreYouSure={setIsAreYouSure}/>}
+                                                    isModelPulling={isModelPulling} apiCallHelper={apiCallHelper} activateAreYouSure={activateAreYouSure}
+                                                    setIsAreYouSure={setIsAreYouSure}/>}
                 {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
             </section>
         </main>

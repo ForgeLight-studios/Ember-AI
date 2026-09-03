@@ -2,7 +2,8 @@ import {useEffect, useState} from "react";
 import ModelList from "./ModelList.jsx";
 
 export default function Models({models, status, progress, pullModel, isModelPulling, apiCallHelper,
-                                   setModels, handleNotification, setAreaYouSureFunction, setAreaYouSureMessage, setIsAreYouSure}) {
+                                   setModels, handleNotification, setAreYouSureFunction, setAreYouSureMessage,
+                                   setIsAreYouSure, activateAreYouSure}) {
 
 
     const [addModel, setAddModel] = useState("");
@@ -51,17 +52,14 @@ export default function Models({models, status, progress, pullModel, isModelPull
                 </div>
             </div>
             <ModelList models={models} apiCallHelper={apiCallHelper} setModels={setModels}
-                       handleNotification={handleNotification} setAreaYouSureMessage={setAreaYouSureMessage}
-                       setAreaYouSureFunction={setAreaYouSureFunction} setIsAreYouSure={setIsAreYouSure}
-                       editModels={editModels}/>
+                       handleNotification={handleNotification} setAreYouSureMessage={setAreYouSureMessage}
+                       setAreYouSureFunction={setAreYouSureFunction} setIsAreYouSure={setIsAreYouSure}
+                       editModels={editModels} activateAreYouSure={activateAreYouSure}/>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "flex-end",
                         alignItems: "center", gap: "20px", marginTop: "10px"}}>
                 <button className={editModels ? "general-button danger-button"  : "general-button success-button"}  onClick={() => {
                     setEditModels(prevState => !prevState);
-                }}>{editModels ? "Cancel" : "Edit"}</button>
-                {editModels && <button className={"general-button success-button"} onClick={() => {
-                    setModels(prevState => !prevState);
-                }}>Save</button>}
+                }}>{editModels ? "Close" : "Edit"}</button>
             </div>
 
         </div>
