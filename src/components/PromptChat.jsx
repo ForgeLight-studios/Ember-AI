@@ -6,7 +6,7 @@ import {nanoid} from "nanoid";
 
 export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat,
                                    setChats, chats, newChat, setCurrentChat, selectedModel,
-                                   setSelectedModel, apiCallHelper}) {
+                                   setSelectedModel, apiCallHelper, modelLifeCycle}) {
     useEffect(() => {
         if (!selectedModel?.name && models.length > 0) {
             setSelectedModel(models[0]);
@@ -87,6 +87,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                 body: JSON.stringify({
                     messages: [...messages, newMessage],
                     model: selectedModel.name,
+                    keep_alive: modelLifeCycle
                 })
             });
             const resData = await res.json();
@@ -157,7 +158,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     }
 
     return (
-        <>
+        <div style={{width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column"}}>
             {(currentChat.name === "New chat" || currentChat.name === "") ? <header className="prompt-chat__header">
                 <h1>Ember AI</h1>
                 <p>Welcome to Ember AI, A simple and locally hosted LLM web-app! Enjoy</p>
@@ -168,8 +169,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             }
 
 
-            <form onSubmit={(e) => onSubmit(e)} className={isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}
-                 style={!currentChat ? {} : {marginBottom: '60px'}}>
+            <form onSubmit={(e) => onSubmit(e)} className={isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}>
                 <textarea className="chat-box"
                           placeholder={"Write a message..."}
                           onFocus={() => setIsTyping( true)}
@@ -240,6 +240,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                         <button type={"submit"} className={"general-button success-button"}>Send</button>
                 </div>
             </form>
-        </>
+        </div>
     )
 }

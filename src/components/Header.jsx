@@ -10,7 +10,7 @@ import ChatList from "./ChatList.jsx";
 
 export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat,
                                     handleNotification, apiCallHelper, setChats, models, activeView,
-                                    setCurrentChat, newChat, setSelectedModel }) {
+                                    setCurrentChat, newChat, setSelectedModel, viewPort}) {
 
     async function createNewChat() {
         try {
@@ -29,9 +29,14 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
         }
     }
 
-    return (
-        <div className={isOpen ? "menu-open menu" : "menu"}>
-            <div className={!isOpen? "menu-title" : "menu-title menu-open_title"} onClick={() => setIsOpen(prev => !prev)}>
+    const menu = (
+        <>
+            <div className={!isOpen? "menu-title" : "menu-title menu-open_title"} style={(isOpen && viewPort <= 700) ? { zIndex: 100 } : { zIndex: 0 }} onClick={() => {
+                setIsOpen(prev => !prev)
+                if (viewPort <= 700) {
+                    setActiveView("Chats")
+                }
+            }}>
                 <img className={!isOpen ? "menu-logo" : "menu-logo menu-open_logo"} src={Logo} alt="logo" />
                 {toggleTitle && <h1>Ember AI</h1>}
             </div>
@@ -40,18 +45,41 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                     setIsOpen(true)
                     setActiveView("Chats");
                 }}>
-                    <img style={isOpen ? {width: "30px", height: "30px", cursor: "pointer"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"} />
+                    <img style={isOpen ? {width: "30px", height: "30px", cursor: "pointer"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"}/>
                     {isOpen && <p>{"Chats"}</p>}
                 </div>
                 {isOpen && <ChatList chats={chats} currentChat={currentChat} createNewChat={createNewChat}
-                                         setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
-                                         setActiveView={setActiveView} setSelectedModel={setSelectedModel} models={models}
-                                         activeView={activeView}/>}
-                <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
-                          setActiveView={setActiveView} activeView={activeView}/>
-                <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Themes"} isMenuOpen={isOpen}
-                          setActiveView={setActiveView} activeView={activeView}/>
+                                     setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
+                                     setActiveView={setActiveView} setSelectedModel={setSelectedModel} models={models}
+                                     activeView={activeView} viewPort={viewPort} setIsMenuOpen={setIsOpen}/>}
+                <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Models"} isMenuOpen={isOpen}
+                          setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
+                <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Settings"} isMenuOpen={isOpen}
+                          setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
             </div>
-        </div>
+        </>
+    )
+
+    return(
+        <>
+            {viewPort >= 700 ?
+            <div className={isOpen ? "menu-open menu" : "menu"}>
+                {menu}
+            </div>
+            :
+                <div className={isOpen ? "menu-open menu" : "menu-mobile"}>
+                    {!isOpen &&<img src={Logo} alt="logo" className={"menu-logo"}
+                          style={{width: "50px", height: "50px", cursor: "pointer"}}
+                          onClick={() => {
+                              setIsOpen(true)
+                              setActiveView("");
+                    }}/>}
+                    {(activeView === "Chats" && !isOpen) &&
+                        <p className={"chat-name"}>{currentChat?.name}</p>
+                    }
+                    {isOpen && <>{menu}</>}
+                </div>
+            }
+    </>
     )
 }

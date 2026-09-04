@@ -1,4 +1,4 @@
-export default function ChatList ({chats, currentChat, newChat, setCurrentChat, setActiveView, setSelectedModel, models}) {
+export default function ChatList ({chats, currentChat, newChat, setCurrentChat, setActiveView, setSelectedModel, models, setIsMenuOpen, viewPort}) {
     const chatList = chats.map((chat) => {
         return(<p className={currentChat ? currentChat.id === chat.id ? "active-chat" : "chat" : "chat"} key={chat.id} onClick={() => {
             const newCurrentChat = chats.find(c => c.id === chat.id)
@@ -7,6 +7,9 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat, 
             const modelObj = models.find(m => m.name === newCurrentChat.model);
             setSelectedModel(modelObj ?? null);
             console.log("CHAT ITERATION FOR LIST: " + newCurrentChat )
+            if (viewPort <= 700) {
+                setIsMenuOpen(prev => !prev)
+            }
         }}>
             {chat.name}
         </p>)
@@ -18,6 +21,10 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat, 
                 <p className={isNewChat ? "disabled-button" : "add-chat"} style={{fontWeight: 700}} onClick={() => {
                     newChat()
                     setSelectedModel({})
+                    if (viewPort <= 700) {
+                        setIsMenuOpen(prev => !prev)
+                        setActiveView("Chats");
+                    }
                 }}
                     >
                     + New Chat

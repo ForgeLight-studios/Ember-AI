@@ -16,8 +16,8 @@ export default function Models({models, status, progress, pullModel, isModelPull
     }, [status, progress])
 
     return (
-        <div className="models-container">
-            <div className="models-header">
+        <div className="page-container">
+            <div className="page-header">
                 <h1>Models</h1>
                 <p>The models available to use are currently only ollama free models</p>
             </div>

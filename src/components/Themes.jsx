@@ -198,18 +198,6 @@ export default function Themes ({setIsDarkMode}){
 
     return (
         <div className={"theme-container__wrapper"}>
-            <h1>Settings</h1>
-            <div className={"form-text__input-field"}>
-                <label>Display Mode</label>
-                <div className={"button-selection__container"}>
-                    <button className={"general-button__selection"} onClick={() => {
-                        setIsDarkMode(true);
-                    }}>DarkMode</button>
-                    <button className={"general-button__selection"} onClick={() => {
-                        setIsDarkMode(false)
-                    }}>LightMode</button>
-                </div>
-            </div>
             <h2>Themes</h2>
             <form className={"theme-form"}>
                 <div className="themes-container">

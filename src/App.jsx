@@ -3,17 +3,27 @@ import './index.css'
 import Header from "./components/Header.jsx";
 import PromptChat from "./components/PromptChat.jsx";
 import Models from "./components/Models.jsx";
-import Themes from "./components/Themes.jsx";
 import {nanoid} from "nanoid";
 import Notifications from "./components/Notifications.jsx";
 import AreYouSure from "../AreYouSure.jsx";
+import Settings from "./components/Settings.jsx";
 
 export default function App() {
 
+    const [modelLifeCycle, setModelLifeCycle] = useState("30m");
     const [models, setModels] = useState([]);
     const [chats, setChats] = useState([]);
     const [currentChat, setCurrentChat] = useState({id: "", name: ""});
     const [selectedModel, setSelectedModel] = useState({});
+
+    const [viewPort,setViewPort ] = useState(window.innerWidth);
+    useEffect(() => {
+        const handleResize = () => {
+            setViewPort(window.innerWidth)
+        }
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [viewPort])
 
     useEffect(() => {
         console.log("SELECTED MODEL: " + JSON.stringify(selectedModel, null, 2));
@@ -321,26 +331,34 @@ export default function App() {
             {isAreYouSure && <AreYouSure message={areYouSureMessage} yesFunction={areYouSureFunction} setIsAreYouSure={setIsAreYouSure}
                                          setAreYouSureMessage={setAreYouSureMessage} setAreYouSureFunction={setAreYouSureFunction} />}
             <Notifications notification={notification} setNotification={setNotification} />
-            <Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
-                    setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
-                    currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
-                    handleNotification={handleNotification} apiCallHelper={apiCallHelper}
-                    setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
-                    models={models}/>
+            {viewPort > 700 &&<Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
+                     setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
+                     currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
+                     handleNotification={handleNotification} apiCallHelper={apiCallHelper}
+                     setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
+                     models={models} viewPort={viewPort}/>}
             <section className={"main-page"}>
-                {(activeView === "Chats") && <p className={"chat-name"}>{currentChat?.name}</p>}
+                {viewPort <= 700 &&<Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
+                                          setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
+                                          currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
+                                          handleNotification={handleNotification} apiCallHelper={apiCallHelper}
+                                          setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
+                                          models={models} viewPort={viewPort}/>}
+                {(activeView === "Chats" && viewPort > 700) &&
+                        <p className={"chat-name"}>{currentChat?.name}</p>
+                }
                 {activeView === "Chats"  && <PromptChat models={models}
                                                       isDarkMode={isDarkMode} url={api_url}
                                                       handleNotification={handleNotification} setChats={setChats} chats={chats}
                                                       currentChat={currentChat} setCurrentChat={setCurrentChat}
                                                        apiCallHelper={apiCallHelper} newChat={newChat} selectedModel={selectedModel}
-                                                       setSelectedModel={setSelectedModel} />}
+                                                       setSelectedModel={setSelectedModel} modelLifeCycle={modelLifeCycle}/>}
                 {activeView === "Models" && <Models models={models} setModels={setModels} setAreYouSureFunction={setAreYouSureFunction}
                                                     api_url={api_url} pullModel={pullModel} setAreYouSureMessage={setAreYouSureMessage}
                                                     status={status} progress={progress} handleNotification={handleNotification}
                                                     isModelPulling={isModelPulling} apiCallHelper={apiCallHelper} activateAreYouSure={activateAreYouSure}
                                                     setIsAreYouSure={setIsAreYouSure}/>}
-                {activeView === "Themes" && <Themes setIsDarkMode={setIsDarkMode} />}
+                {activeView === "Settings" && <Settings setIsDarkMode={setIsDarkMode}/>}
             </section>
         </main>
 
