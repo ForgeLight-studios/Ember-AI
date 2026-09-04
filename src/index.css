@@ -92,12 +92,6 @@ body {
     box-shadow: var(--border-color) 1px 1px 3px 1px;
 }
 
-@media (max-width: 700px) {
-    .page-container {
-        max-height: 82%;
-    }
-}
-
 @media (max-width: 1100px) {
     .page-container {
         width: 90%;
@@ -195,6 +189,15 @@ main {
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
+    background-color: var(--neutral);
+}
+
+.dark-mode .general-button__selection {
+    background-color: var(--dm-neutral);
+}
+
+.general-button__selection:hover, .dark-mode .general-button-selection__clicked {
+    background-color: var(--tertiary-75);
 }
 
 .general-button__selection:hover, .general-button-selection__clicked {

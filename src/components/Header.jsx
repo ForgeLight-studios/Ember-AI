@@ -1,8 +1,8 @@
 import Logo from '../assets/logo.svg'
 import MenuItem from "./MenuItem.jsx";
 import modelImageLight from "../assets/model-icon-light.svg";
-import themeImageLight from "../assets/theme-icon-light.svg";
-import themeImageDark from "../assets/theme-icon-dark.svg";
+import settingsImageLight from "../assets/settings-icon-light.svg";
+import settingsImageDark from "../assets/settings-icon-dark.svg";
 import modelImageDark from "../assets/model-icon-dark.svg";
 import chatImageDark from "../assets/chats-icon-dark.svg";
 import chatImageLight from "../assets/chats-icon-light.svg";
@@ -52,9 +52,9 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                                      setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
                                      setActiveView={setActiveView} setSelectedModel={setSelectedModel} models={models}
                                      activeView={activeView} viewPort={viewPort} setIsMenuOpen={setIsOpen}/>}
-                <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Models"} isMenuOpen={isOpen}
+                <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
                           setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
-                <MenuItem itemImage={isDarkMode ? themeImageDark : themeImageLight} itemName={"Settings"} isMenuOpen={isOpen}
+                <MenuItem itemImage={isDarkMode ? settingsImageDark : settingsImageLight} itemName={"Settings"} isMenuOpen={isOpen}
                           setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
             </div>
         </>

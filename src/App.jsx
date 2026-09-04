@@ -115,12 +115,7 @@ export default function App() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
     const [isDarkMode, setIsDarkMode] = useState(() => {
-        const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
-        if (darkMode) {
-            return true
-        } else {
-            return false
-        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
     });
 
     const didLoad = useRef(false);
@@ -358,7 +353,7 @@ export default function App() {
                                                     status={status} progress={progress} handleNotification={handleNotification}
                                                     isModelPulling={isModelPulling} apiCallHelper={apiCallHelper} activateAreYouSure={activateAreYouSure}
                                                     setIsAreYouSure={setIsAreYouSure}/>}
-                {activeView === "Settings" && <Settings setIsDarkMode={setIsDarkMode}/>}
+                {activeView === "Settings" && <Settings setIsDarkMode={setIsDarkMode} setModelLifeCycle={setModelLifeCycle} isDarkMode={isDarkMode} modelLifeCycle={modelLifeCycle}/>}
             </section>
         </main>
 
