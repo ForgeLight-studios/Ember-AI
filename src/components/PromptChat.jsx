@@ -43,11 +43,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     })
 
     useEffect(() => {
-        console.log("Chats: " + JSON.stringify(chats, null, 2));
-        console.log("Current messages: " + JSON.stringify(currentChat, null, 2));
-    }, [chats])
-
-    useEffect(() => {
         messageRef.current?.scrollIntoView({behavior: "smooth"});
         textAreaRef.current?.focus()
     }, [chats])

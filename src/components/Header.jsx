@@ -44,6 +44,9 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                 <div title={"Chats"} className={activeView === "Chats" ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
                     setIsOpen(true)
                     setActiveView("Chats");
+                    if (viewPort <= 700) {
+                        setIsOpen(prev => !prev)
+                    }
                 }}>
                     <img style={isOpen ? {width: "30px", height: "30px", cursor: "pointer"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"}/>
                     {isOpen && <p>{"Chats"}</p>}

@@ -10,6 +10,9 @@ import Settings from "./components/Settings.jsx";
 
 export default function App() {
 
+    const api_url = `http://${window.location.hostname}:3100`;
+
+
     const [modelLifeCycle, setModelLifeCycle] = useState("30m");
     const [models, setModels] = useState([]);
     const [chats, setChats] = useState([]);
@@ -25,9 +28,6 @@ export default function App() {
         return () => window.removeEventListener('resize', handleResize)
     }, [viewPort])
 
-    useEffect(() => {
-        console.log("SELECTED MODEL: " + JSON.stringify(selectedModel, null, 2));
-    }, [selectedModel]);
 
     const [notification, setNotification] = useState([]);
     function handleNotification(type, message) {
@@ -49,8 +49,10 @@ export default function App() {
             setNotification(prev => prev.filter(n => n.id !== id));
         }, 3400); // 3500 + transition duration
     }
+    useEffect(() => {
+        handleNotification("notice", api_url)
+    }, [api_url]);
 
-    const api_url = "http://localhost:3100"
 
     function newChat() {
         console.log("creating a New chat");
