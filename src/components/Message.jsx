@@ -1,9 +1,9 @@
-export default function Message ({text, user, latestMessageRef, isLast, assistant, failed}) {
+export default function Message ({text, user, latestMessageRef, isLast, assistant, failed, isFirst}) {
 
     console.log("[Server - MessageElement] message failed??: " + failed)
     return (
-        <div className="message-wrapper">
-            <div ref={isLast ? latestMessageRef : null} className={user === "user" ? failed ? "disabled-button message message-user" : "message message-user" : "message-ai"}>
+        <div className="message-wrapper" style={isFirst ? {marginTop: "10px"} : {marginBottom: 0}}>
+            <div ref={(isLast) ? latestMessageRef : null} className={user === "user" ? failed ? "disabled-button message message-user" : "message message-user" : "message-ai"}>
                 <div className={"message-header"}>
                     <p>{user === "assistant" ? `${assistant}` : user}</p>
                 </div>

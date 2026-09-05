@@ -72,13 +72,13 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
             :
                 <div className={isOpen ? "menu-open menu" : "menu-mobile"}>
                     {!isOpen &&<img src={Logo} alt="logo" className={"menu-logo"}
-                          style={{width: "50px", height: "50px", cursor: "pointer"}}
+                          style={{width: "50px", height: "50px", cursor: "pointer", marginTop: "5px"}}
                           onClick={() => {
                               setIsOpen(true)
                               setActiveView("");
                     }}/>}
                     {(activeView === "Chats" && !isOpen) &&
-                        <p className={"chat-name"}>{currentChat?.name}</p>
+                        <p className={"chat-name"} style={{margin: "18px"}}>{currentChat?.name}</p>
                     }
                     {isOpen && <>{menu}</>}
                 </div>

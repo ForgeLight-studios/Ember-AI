@@ -49,10 +49,6 @@ export default function App() {
             setNotification(prev => prev.filter(n => n.id !== id));
         }, 3400); // 3500 + transition duration
     }
-    useEffect(() => {
-        handleNotification("notice", api_url)
-    }, [api_url]);
-
 
     function newChat() {
         console.log("creating a New chat");
@@ -327,7 +323,7 @@ export default function App() {
         <main>
             {isAreYouSure && <AreYouSure message={areYouSureMessage} yesFunction={areYouSureFunction} setIsAreYouSure={setIsAreYouSure}
                                          setAreYouSureMessage={setAreYouSureMessage} setAreYouSureFunction={setAreYouSureFunction} />}
-            <Notifications notification={notification} setNotification={setNotification} />
+            <Notifications notification={notification} viewPort={viewPort}/>
             {viewPort > 700 &&<Header isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                      setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
                      currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
@@ -349,7 +345,7 @@ export default function App() {
                                                       handleNotification={handleNotification} setChats={setChats} chats={chats}
                                                       currentChat={currentChat} setCurrentChat={setCurrentChat}
                                                        apiCallHelper={apiCallHelper} newChat={newChat} selectedModel={selectedModel}
-                                                       setSelectedModel={setSelectedModel} modelLifeCycle={modelLifeCycle}/>}
+                                                       setSelectedModel={setSelectedModel} modelLifeCycle={modelLifeCycle} viewPort={viewPort}/>}
                 {activeView === "Models" && <Models models={models} setModels={setModels} setAreYouSureFunction={setAreYouSureFunction}
                                                     api_url={api_url} pullModel={pullModel} setAreYouSureMessage={setAreYouSureMessage}
                                                     status={status} progress={progress} handleNotification={handleNotification}

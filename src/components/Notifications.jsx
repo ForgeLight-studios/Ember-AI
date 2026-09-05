@@ -1,5 +1,5 @@
 export default function Notifications (props) {
-    const notification = props.notification.slice(0, 4)
+    const notification = props.viewPort <= 700 ? props.notification.slice(0, 2) : props.notification.slice(0, 4)
     return (
         <div className={'notification-container'}>
             {notification.map(notification => (

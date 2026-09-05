@@ -6,7 +6,7 @@ import {nanoid} from "nanoid";
 
 export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat,
                                    setChats, chats, newChat, setCurrentChat, selectedModel,
-                                   setSelectedModel, apiCallHelper, modelLifeCycle}) {
+                                   setSelectedModel, apiCallHelper, modelLifeCycle, viewPort}) {
     useEffect(() => {
         if (!selectedModel?.name && models.length > 0) {
             setSelectedModel(models[0]);
@@ -44,14 +44,16 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     useEffect(() => {
         messageRef.current?.scrollIntoView({behavior: "smooth"});
-        textAreaRef.current?.focus()
+        if (viewPort > 700) textAreaRef.current?.focus()
     }, [chats])
 
     const messageList = messages?.map((message, index) => {
         const length = messages.length;
         const isLast = index === length-1
+        const isFirst = index === 0
         return (
-            <Message failed={message?.failed} text={message.content} key={message.id} user={message.role} latestMessageRef={messageRef} isLast={isLast} assistant={selectedModel.name}/>
+            <Message failed={message?.failed} text={message.content} key={message.id} user={message.role} latestMessageRef={messageRef}
+                     isLast={isLast} assistant={selectedModel.name} isFirst={isFirst}/>
         )
     })
 
@@ -153,7 +155,8 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     }
 
     return (
-        <div style={{width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column"}}>
+        <>
+        {/*<div style={{width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column"}}>*/}
             {(currentChat.name === "New chat" || currentChat.name === "") ? <header className="prompt-chat__header">
                 <h1>Ember AI</h1>
                 <p>Welcome to Ember AI, A simple and locally hosted LLM web-app! Enjoy</p>
@@ -188,6 +191,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                     <Select options={modelOptions}
                             isDisabled={messages.length > 0}
                             value={modelOptions.find(o => o.value.name === selectedModel?.name) ?? null}
+                            isSearchable={false}
                             styles={{
                         container: (base) => ({
                             ...base,
@@ -235,6 +239,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                         <button type={"submit"} className={"general-button success-button"}>Send</button>
                 </div>
             </form>
-        </div>
+            {/*</div>*/}
+        </>
     )
 }
