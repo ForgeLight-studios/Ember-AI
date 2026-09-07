@@ -585,6 +585,7 @@ header > h1 {
     justify-content: center;
     height: fit-content;
     padding: 10px;
+    gap: 5px;
 }
 
 .menu-item {
@@ -945,15 +946,16 @@ input[type="text"].model-list__description {
     text-align: center;
     color: aliceblue;
     transition: width 0.3s ease-in-out;
-    background-color: var(--tertiary);
+    background-color: var(--secondary-75);
     overflow: hidden;
     border-right: 3px solid var(--secondary);
+    cursor: none;
 }
 
 .notification-container {
     position: fixed;
-    top: 50px;
-    left: 15px;
+    right: 15px;
+    bottom: 50px;
     z-index: 150;
     display: flex;
     flex-direction: column;
@@ -990,14 +992,24 @@ input[type="text"].model-list__description {
     gap: 5px;
 }
 
-.chat-list > p {
+.chat-list > div > p {
     border-radius: 10px;
     margin: 0;
     padding: 5px;
     cursor: pointer;
+    width: 100%;
 }
 
-.chat-list > .chat:hover {
+.chat-list > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.chat-list > div > .chat:hover {
     background-color: var(--neutral);
 }
 
@@ -1005,8 +1017,8 @@ input[type="text"].model-list__description {
     background-color: var(--neutral);
 }
 
-.chat-list > .add-chat:hover {
-    background-color: var(--secondary-75);
+.chat-list > div > .add-chat:hover {
+    background-color: var(--tertiary-75);
 }
 
 /*-------------------Settings---------------------*/
@@ -1104,7 +1116,7 @@ input[type="text"].model-list__description {
     background-color: var(--dm-neutral);
 }
 
-.dark-mode .chat-list > .chat:hover {
+.dark-mode .chat-list > div > .chat:hover {
     background-color: var(--dm-neutral);
 }
 

@@ -9,11 +9,9 @@ import chatImageLight from "../assets/chats-icon-light.svg";
 import ChatList from "./ChatList.jsx";
 import {Route, Routes} from "react-router-dom";
 
-export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat,
+export default function Header ({ isOpen, setIsOpen, isDarkMode, chats, currentChat,
                                     handleNotification, apiCallHelper, setChats, models, activeView,
                                     setCurrentChat, newChat, setSelectedModel, viewPort, navigate}) {
-
-
 
     async function createNewChat() {
         try {
@@ -52,12 +50,12 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                 </div>
                 {isOpen && <ChatList navigate={navigate} chats={chats} currentChat={currentChat} createNewChat={createNewChat}
                                      setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
-                                     setActiveView={setActiveView} setSelectedModel={setSelectedModel} models={models}
-                                     activeView={activeView} viewPort={viewPort} setIsMenuOpen={setIsOpen}/>}
+                                     setSelectedModel={setSelectedModel} models={models} handleNotification={handleNotification}
+                                     viewPort={viewPort} setIsMenuOpen={setIsOpen} apiCallHelper={apiCallHelper}/>}
                 <MenuItem navigate={navigate} itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
-                          setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
+                          setIsMenuOpen={setIsOpen} viewPort={viewPort}/>
                 <MenuItem navigate={navigate} itemImage={isDarkMode ? settingsImageDark : settingsImageLight} itemName={"Settings"} isMenuOpen={isOpen}
-                          setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
+                          setIsMenuOpen={setIsOpen} viewPort={viewPort}/>
             </div>
         </>
     )
