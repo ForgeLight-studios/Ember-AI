@@ -347,7 +347,7 @@ export default function App() {
                     <Routes>
                         <Route path="/chat/:chatId" element={
                             <>
-                                <p className={"chat-name"}>{currentChat?.name}</p>
+                                {viewPort > 700 && <p className={"chat-name"}>{currentChat?.name}</p>}
                                 <PromptChat  models={models}
                                              isDarkMode={isDarkMode} url={api_url}
                                              handleNotification={handleNotification} setChats={setChats} chats={chats}
@@ -366,21 +366,6 @@ export default function App() {
                         <Route path={"/settings"} element={
                             <Settings setIsDarkMode={setIsDarkMode} setModelLifeCycle={setModelLifeCycle} isDarkMode={isDarkMode} modelLifeCycle={modelLifeCycle}/>}
                         />
-                        {/*{(activeView === "Chats" && viewPort > 700) &&*/}
-                        {/*        <p className={"chat-name"}>{currentChat?.name}</p>*/}
-                        {/*}*/}
-                        {/*{activeView === "Chats"  && <PromptChat models={models}*/}
-                        {/*                                      isDarkMode={isDarkMode} url={api_url}*/}
-                        {/*                                      handleNotification={handleNotification} setChats={setChats} chats={chats}*/}
-                        {/*                                      currentChat={currentChat} setCurrentChat={setCurrentChat}*/}
-                        {/*                                       apiCallHelper={apiCallHelper} newChat={newChat} selectedModel={selectedModel}*/}
-                        {/*                                       setSelectedModel={setSelectedModel} modelLifeCycle={modelLifeCycle} viewPort={viewPort}/>}*/}
-                        {/*{activeView === "Models" && <Models models={models} setModels={setModels} setAreYouSureFunction={setAreYouSureFunction}*/}
-                        {/*                                    api_url={api_url} pullModel={pullModel} setAreYouSureMessage={setAreYouSureMessage}*/}
-                        {/*                                    status={status} progress={progress} handleNotification={handleNotification}*/}
-                        {/*                                    isModelPulling={isModelPulling} apiCallHelper={apiCallHelper} activateAreYouSure={activateAreYouSure}*/}
-                        {/*                                    setIsAreYouSure={setIsAreYouSure}/>}*/}
-                        {/*{activeView === "Settings" && <Settings setIsDarkMode={setIsDarkMode} setModelLifeCycle={setModelLifeCycle} isDarkMode={isDarkMode} modelLifeCycle={modelLifeCycle}/>}*/}
                     </Routes>
                 </section>
         </main>

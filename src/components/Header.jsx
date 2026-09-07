@@ -7,6 +7,7 @@ import modelImageDark from "../assets/model-icon-dark.svg";
 import chatImageDark from "../assets/chats-icon-dark.svg";
 import chatImageLight from "../assets/chats-icon-light.svg";
 import ChatList from "./ChatList.jsx";
+import {Route, Routes} from "react-router-dom";
 
 export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat,
                                     handleNotification, apiCallHelper, setChats, models, activeView,
@@ -37,7 +38,7 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                 setIsOpen(prev => !prev)
             }}>
                 <img className={!isOpen ? "menu-logo" : "menu-logo menu-open_logo"} src={Logo} alt="logo" />
-                {toggleTitle && <h1>Ember AI</h1>}
+                {isOpen && <h1>Ember AI</h1>}
             </div>
             <div className={"menu-item-list"}>
                 <div title={"Chats"} className={activeView === "Chats" ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
@@ -74,9 +75,9 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                                     onClick={() => {
                                         setIsOpen(prev => !prev);
                                     }}/>}
-                    {(activeView === "Chats" && !isOpen) &&
-                        <p className={"chat-name"} style={{margin: "18px"}}>{currentChat?.name}</p>
-                    }
+                    <Routes>
+                        <Route path={"/chat/:chatId"} element={<p className={"chat-name"} style={{margin: "18px"}}>{currentChat?.name}</p>}/>
+                    </Routes>
                     {isOpen && <>{menu}</>}
                 </div>
             }

@@ -20,12 +20,11 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat, 
     return (
         <div className={"chat-list"}>
                 <p className={isNewChat ? "disabled-button" : "add-chat"} style={{fontWeight: 700}} onClick={() => {
-                    newChat()
-                    navigate(`/chat/newChat`)
+                    const chat = newChat()
+                    navigate(`/chat/${chat.id}`)
                     if (viewPort <= 700) {
                         setIsMenuOpen(prev => !prev)
-                        navigate("/chat/newChat")
-                        // setActiveView("Chats");
+                        navigate(`/chat/${chat.id}`)
                     }
                 }}
                     >

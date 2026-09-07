@@ -882,7 +882,7 @@ header > h1 {
     align-items: center;
     width: calc(100% - 20px);
     padding: 10px;
-    max-height: 300px;
+    min-height: 300px;
     overflow-y: scroll;
 }
 
