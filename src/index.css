@@ -42,7 +42,6 @@
     --dm-spark-accent: #FF9E22; /* Golden-orange */
 }
 /** { outline: 1px solid red; }*/
-
 /* Base Styles */
 body {
     color: var(--text-primary);
@@ -518,6 +517,10 @@ header > h1 {
     top: 0;
 }
 
+.menu-open .menu-mobile {
+    height: 100vh;
+}
+
 .dark-mode .menu-mobile {
     background-color: var(--dm-primary);
 }
@@ -546,6 +549,15 @@ header > h1 {
 .menu-open {
     width: 100%;
     transition: width 0.3s ease-in-out;
+}
+
+.mobile-menu__open {
+    width: 100%;
+    transition: width 0.3s ease-in-out;
+    height: 100%;
+    z-index: 10;
+    position: absolute;
+    top: 0;
 }
 
 .menu-logo {

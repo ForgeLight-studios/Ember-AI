@@ -10,7 +10,9 @@ import ChatList from "./ChatList.jsx";
 
 export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView, isDarkMode, chats, currentChat,
                                     handleNotification, apiCallHelper, setChats, models, activeView,
-                                    setCurrentChat, newChat, setSelectedModel, viewPort}) {
+                                    setCurrentChat, newChat, setSelectedModel, viewPort, navigate}) {
+
+
 
     async function createNewChat() {
         try {
@@ -33,9 +35,6 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
         <>
             <div className={!isOpen? "menu-title" : "menu-title menu-open_title"} style={(isOpen && viewPort <= 700) ? { zIndex: 100 } : { zIndex: 0 }} onClick={() => {
                 setIsOpen(prev => !prev)
-                if (viewPort <= 700) {
-                    setActiveView("Chats")
-                }
             }}>
                 <img className={!isOpen ? "menu-logo" : "menu-logo menu-open_logo"} src={Logo} alt="logo" />
                 {toggleTitle && <h1>Ember AI</h1>}
@@ -43,7 +42,6 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
             <div className={"menu-item-list"}>
                 <div title={"Chats"} className={activeView === "Chats" ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
                     setIsOpen(true)
-                    setActiveView("Chats");
                     if (viewPort <= 700) {
                         setIsOpen(prev => !prev)
                     }
@@ -51,13 +49,13 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                     <img style={isOpen ? {width: "30px", height: "30px", cursor: "pointer"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"}/>
                     {isOpen && <p>{"Chats"}</p>}
                 </div>
-                {isOpen && <ChatList chats={chats} currentChat={currentChat} createNewChat={createNewChat}
+                {isOpen && <ChatList navigate={navigate} chats={chats} currentChat={currentChat} createNewChat={createNewChat}
                                      setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
                                      setActiveView={setActiveView} setSelectedModel={setSelectedModel} models={models}
                                      activeView={activeView} viewPort={viewPort} setIsMenuOpen={setIsOpen}/>}
-                <MenuItem itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
+                <MenuItem navigate={navigate} itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
                           setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
-                <MenuItem itemImage={isDarkMode ? settingsImageDark : settingsImageLight} itemName={"Settings"} isMenuOpen={isOpen}
+                <MenuItem navigate={navigate} itemImage={isDarkMode ? settingsImageDark : settingsImageLight} itemName={"Settings"} isMenuOpen={isOpen}
                           setIsMenuOpen={setIsOpen} setActiveView={setActiveView} activeView={activeView} viewPort={viewPort}/>
             </div>
         </>
@@ -70,13 +68,12 @@ export default function Header ({ toggleTitle, isOpen, setIsOpen, setActiveView,
                 {menu}
             </div>
             :
-                <div className={isOpen ? "menu-open menu" : "menu-mobile"}>
+                <div className={isOpen ? "mobile-menu__open menu" : "menu-mobile"}>
                     {!isOpen &&<img src={Logo} alt="logo" className={"menu-logo"}
                           style={{width: "50px", height: "50px", cursor: "pointer", marginTop: "5px"}}
-                          onClick={() => {
-                              setIsOpen(true)
-                              setActiveView("");
-                    }}/>}
+                                    onClick={() => {
+                                        setIsOpen(prev => !prev);
+                                    }}/>}
                     {(activeView === "Chats" && !isOpen) &&
                         <p className={"chat-name"} style={{margin: "18px"}}>{currentChat?.name}</p>
                     }

@@ -2,11 +2,23 @@ import {useEffect, useRef, useState} from "react";
 import Select from 'react-select'
 import Message from "./Message.jsx";
 import {nanoid} from "nanoid";
+import { useParams } from "react-router-dom";
 
 
 export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat,
                                    setChats, chats, newChat, setCurrentChat, selectedModel,
                                    setSelectedModel, apiCallHelper, modelLifeCycle, viewPort}) {
+
+    const { chatId } = useParams();
+
+    useEffect(() => {
+        if (!chatId) return;
+        const chat = chats.find(c => c.id === chatId);
+        if (chat) setCurrentChat(chat);
+    }, [chatId, chats, setCurrentChat]);
+
+    const messages = chats.find(c => c && c.id === currentChat?.id)?.messages ?? [];
+
     useEffect(() => {
         if (!selectedModel?.name && models.length > 0) {
             setSelectedModel(models[0]);
@@ -35,7 +47,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     })
 
     const [isTyping, setIsTyping] = useState(false);
-    const messages = chats.find(c => c && c.id === currentChat?.id)?.messages ?? [];
     const modelOptions = models.filter((model) => model.status !== "failed").map((m) => {
         return {
             label: m.name, value: m
