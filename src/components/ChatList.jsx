@@ -1,6 +1,9 @@
+import KebabMenuLight from '../assets/kebab-menu-icon-light.svg'
+import KebabMenuDark from '../assets/kebab-menu-icon-dark.svg'
+
 export default function ChatList ({chats, currentChat, newChat, setCurrentChat,
                                   setSelectedModel, models, setIsMenuOpen, viewPort, navigate,
-                                  handleNotification, apiCallHelper, setChats}) {
+                                  handleNotification, apiCallHelper, setChats, isDarkMode}) {
 
     async function onSubmit (chat) {
         if (!chat) {
@@ -38,12 +41,10 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat,
                     }}>
                     {chat.name}
                 </p>
-                    <button className={"general-button danger-button"} style={{fontSize: "15px", padding: "10px"}}
-                        onClick={async() => {
-                            await onSubmit(chat)
-                        }}
-                    >x</button>
-            </div>
+                    <img className={"img-button"} src={isDarkMode ? KebabMenuDark : KebabMenuLight} alt={"chat kebab menu"} onClick={async() => {
+                        await onSubmit(chat)
+                    }}/>
+                </div>
             )
     })
 

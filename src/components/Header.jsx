@@ -51,11 +51,11 @@ export default function Header ({ isOpen, setIsOpen, isDarkMode, chats, currentC
                 {isOpen && <ChatList navigate={navigate} chats={chats} currentChat={currentChat} createNewChat={createNewChat}
                                      setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
                                      setSelectedModel={setSelectedModel} models={models} handleNotification={handleNotification}
-                                     viewPort={viewPort} setIsMenuOpen={setIsOpen} apiCallHelper={apiCallHelper}/>}
+                                     viewPort={viewPort} setIsMenuOpen={setIsOpen} apiCallHelper={apiCallHelper} isDarkMode={isDarkMode} />}
                 <MenuItem navigate={navigate} itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
-                          setIsMenuOpen={setIsOpen} viewPort={viewPort}/>
+                          setIsMenuOpen={setIsOpen} viewPort={viewPort} currentChat={currentChat}/>
                 <MenuItem navigate={navigate} itemImage={isDarkMode ? settingsImageDark : settingsImageLight} itemName={"Settings"} isMenuOpen={isOpen}
-                          setIsMenuOpen={setIsOpen} viewPort={viewPort}/>
+                          setIsMenuOpen={setIsOpen} viewPort={viewPort} currentChat={currentChat}/>
             </div>
         </>
     )

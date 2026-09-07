@@ -1,7 +1,7 @@
-export default function MenuItem({itemImage, itemName, isMenuOpen, setActiveView, activeView, viewPort, setIsMenuOpen, navigate}) {
+export default function MenuItem({itemImage, itemName, isMenuOpen, currentChat, viewPort, setIsMenuOpen, navigate}) {
+
     return (
-        <div title={itemName} className={activeView === itemName ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
-            setActiveView(itemName)
+        <div title={itemName} className={currentChat.name === itemName ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
             navigate(`/${itemName.toLowerCase()}`)
             if (viewPort <= 700) {
                 setIsMenuOpen(prev => !prev)

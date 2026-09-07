@@ -1013,6 +1013,20 @@ input[type="text"].model-list__description {
     background-color: var(--neutral);
 }
 
+.img-button {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.img-button:hover {
+    background-color: var(--neutral);
+}
+
+.dark-mode .img-button:hover {
+    background-color: var(--dm-neutral);
+}
+
 .active-chat {
     background-color: var(--neutral);
 }
