@@ -10,9 +10,9 @@ import ChatList from "./ChatList.jsx";
 import {Route, Routes} from "react-router-dom";
 
 export default function Header ({ isOpen, setIsOpen, isDarkMode, chats, currentChat,
-                                    handleNotification, apiCallHelper, setChats, models, activeView,
+                                    handleNotification, apiCallHelper, setChats, models,
                                     setCurrentChat, newChat, setSelectedModel, viewPort, navigate,
-                                    activateAreYouSure}) {
+                                    activateAreYouSure, location}) {
 
     async function createNewChat() {
         try {
@@ -40,11 +40,12 @@ export default function Header ({ isOpen, setIsOpen, isDarkMode, chats, currentC
                 {isOpen && <h1>Ember AI</h1>}
             </div>
             <div className={"menu-item-list"}>
-                <div title={"Chats"} className={activeView === "Chats" ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
+                <div title={"Chats"} className={location.pathname === "/chat/:chatId" ? "menu-item menu-item__selected" : "menu-item"} onClick={() => {
                     setIsOpen(true)
                     if (viewPort <= 700) {
                         setIsOpen(prev => !prev)
                     }
+                    navigate(`/chat/:chatId`)
                 }}>
                     <img style={isOpen ? {width: "30px", height: "30px", cursor: "pointer"} : {}} src={isDarkMode ? chatImageDark : chatImageLight} alt={"Chats"}/>
                     {isOpen && <p>{"Chats"}</p>}
@@ -53,11 +54,11 @@ export default function Header ({ isOpen, setIsOpen, isDarkMode, chats, currentC
                                      setCurrentChat={setCurrentChat} setChats={setChats} newChat={newChat}
                                      setSelectedModel={setSelectedModel} models={models} handleNotification={handleNotification}
                                      viewPort={viewPort} setIsMenuOpen={setIsOpen} apiCallHelper={apiCallHelper} isDarkMode={isDarkMode}
-                                     activateAreYouSure={activateAreYouSure}/>}
+                                     activateAreYouSure={activateAreYouSure} />}
                 <MenuItem navigate={navigate} itemImage={isDarkMode ? modelImageDark : modelImageLight} itemName={"Models"} isMenuOpen={isOpen}
-                          setIsMenuOpen={setIsOpen} viewPort={viewPort} currentChat={currentChat}/>
+                          setIsMenuOpen={setIsOpen} viewPort={viewPort} currentChat={currentChat} location={location}/>
                 <MenuItem navigate={navigate} itemImage={isDarkMode ? settingsImageDark : settingsImageLight} itemName={"Settings"} isMenuOpen={isOpen}
-                          setIsMenuOpen={setIsOpen} viewPort={viewPort} currentChat={currentChat}/>
+                          setIsMenuOpen={setIsOpen} viewPort={viewPort} currentChat={currentChat} location={location}/>
             </div>
         </>
     )

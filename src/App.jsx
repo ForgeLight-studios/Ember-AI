@@ -7,10 +7,11 @@ import {nanoid} from "nanoid";
 import Notifications from "./components/Notifications.jsx";
 import AreYouSure from "../AreYouSure.jsx";
 import Settings from "./components/Settings.jsx";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import {Routes, Route, useNavigate, useLocation} from "react-router-dom";
 
 export default function App() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (window.location.pathname === "/") {
@@ -320,9 +321,12 @@ export default function App() {
     const [areYouSureMessage, setAreYouSureMessage] = useState("");
     const [areYouSureFunction, setAreYouSureFunction] = useState(null);
 
-    function activateAreYouSure(message, func) {
+    function activateAreYouSure(message, func, failFunc) {
         setAreYouSureMessage(message);
         setAreYouSureFunction(func);
+        if (failFunc) {
+            failFunc();
+        }
         setIsAreYouSure(true)
     }
 
@@ -336,14 +340,16 @@ export default function App() {
                          currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
                          handleNotification={handleNotification} apiCallHelper={apiCallHelper}
                          setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
-                         models={models} viewPort={viewPort} activateAreYouSure={activateAreYouSure}/>}
+                         models={models} viewPort={viewPort} activateAreYouSure={activateAreYouSure}
+                         location={location}/>}
                 <section className={"main-page"}>
                     {viewPort <= 700 &&<Header navigate={navigate} isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                                                setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
                                                currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
                                                handleNotification={handleNotification} apiCallHelper={apiCallHelper}
                                                setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
-                                               models={models} viewPort={viewPort} activateAreYouSure={activateAreYouSure}/>}
+                                               models={models} viewPort={viewPort} activateAreYouSure={activateAreYouSure}
+                                               location={location}/>}
                     <Routes>
                         <Route path="/chat/:chatId" element={
                             <>
