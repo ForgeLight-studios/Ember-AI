@@ -336,14 +336,14 @@ export default function App() {
                          currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
                          handleNotification={handleNotification} apiCallHelper={apiCallHelper}
                          setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
-                         models={models} viewPort={viewPort}/>}
+                         models={models} viewPort={viewPort} activateAreYouSure={activateAreYouSure}/>}
                 <section className={"main-page"}>
                     {viewPort <= 700 &&<Header navigate={navigate} isDarkMode={isDarkMode} isOpen={isMenuOpen} toggleTitle={toggleMenuTitle}
                                                setIsOpen={setIsMenuOpen} setActiveView={setActiveView} chats={chats}
                                                currentChat={currentChat} setCurrentChat={setCurrentChat} newChat={newChat}
                                                handleNotification={handleNotification} apiCallHelper={apiCallHelper}
                                                setChats={setChats} setSelectedModel={setSelectedModel} activeView={activeView}
-                                               models={models} viewPort={viewPort}/>}
+                                               models={models} viewPort={viewPort} activateAreYouSure={activateAreYouSure}/>}
                     <Routes>
                         <Route path="/chat/:chatId" element={
                             <>

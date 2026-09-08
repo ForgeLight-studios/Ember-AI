@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 
 export default function ModelList({models, apiCallHelper, setModels, handleNotification,
-                                  setAreYouSureFunction, setAreYouSureMessage, setIsAreYouSure,
                                   editModels, activateAreYouSure}) {
 
     const [newDescription, setNewDescription] = useState({
