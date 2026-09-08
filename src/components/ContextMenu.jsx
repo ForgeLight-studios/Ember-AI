@@ -1,7 +1,7 @@
 import {useState} from "react";
 
 export default function ContextMenu({menuItems, title, x, y, isDarkMode, apiCallHelper, chats, chat, handleNotification,
-                                        activateAreYouSure, setChats, setWhichContextMenu}) {
+                                        activateAreYouSure, setChats, setWhichContextMenu, viewPort}) {
     const [rename, setRename] = useState("");
 
     async function onSubmit(chat, chats) {
@@ -58,9 +58,13 @@ export default function ContextMenu({menuItems, title, x, y, isDarkMode, apiCall
         )
     })
     return (
-        <div id={"context-menu"} style={{left: x + 'px', top: y + 'px'}}>
-            <header className="page-header" style={{fontWeight: "bold", margin: 0}}>
-                {title}
+        <div id={"context-menu"} style={{left: viewPort <= 700 ? x -120 + 'px' : x, top: y + 'px'}}>
+            <header className="page-header" style={{fontWeight: "bold", margin: 0, flexDirection: "row", height: viewPort <= 700 ? "50px" : "auto"}}>
+                <h1 style={{fontSize: "18px", width: "100%"}}>{title}</h1>
+                {viewPort <= 700 && <button className={"general-button"} style={{
+                    fontSize: "15px", padding: 0, border: "none", bottom: "38px",
+                    position: "absolute", left: "90px", zIndexed: 1
+                }} onClick={() => setWhichContextMenu("")}>X</button>}
             </header>
             {menuItemElements}
         </div>
