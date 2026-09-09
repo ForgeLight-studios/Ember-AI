@@ -81,7 +81,7 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat,
     return (
         <div className={"chat-list"}>
             <div>
-                <p className={isNewChat ? "disabled-button" : "add-chat"} style={{fontWeight: 700}} onClick={() => {
+                <p className={isNewChat ? "disabled" : "add-chat"} style={{fontWeight: 700}} onClick={() => {
                     const chat = newChat()
                     navigate(`/chat/${chat.id}`)
                     if (viewPort <= 700) {

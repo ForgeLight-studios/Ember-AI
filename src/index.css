@@ -146,7 +146,7 @@ main {
     align-items: center;
     justify-content: center;
     height: 100dvh;
-    width: 100%;
+    width: inherit;
     overflow: hidden;
 }
 
@@ -262,7 +262,7 @@ main {
     background-color: var(--tertiary-75);
 }
 
-.disabled-button {
+.disabled {
     pointer-events: none;
     cursor: not-allowed;
     opacity: 0.65;
@@ -551,11 +551,16 @@ header > h1 {
     flex-direction: row;
     width: 100dvw;
     height: 50px;
-    box-shadow: 0 10px 7px 4px rgba(0, 0, 0, 1);
     padding: 5px;
+    box-shadow: 0 10px 7px 4px rgba(200, 200, 200, 0.5);
     align-items: center;
     position: fixed;
     top: 0;
+}
+
+.dark-mode .menu-mobile {
+    box-shadow: 0 10px 7px 4px rgba(0, 0, 0, 1);
+
 }
 
 .menu-open .menu-mobile {
@@ -658,6 +663,53 @@ header > h1 {
 
 
 /*--------------- Prompt chat -----------*/
+.spinner__wrapper {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+}
+
+.spinner__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 25px;
+    height: 25px;
+    animation: spin 800ms linear infinite;
+    margin-top: 25px;
+}
+
+.base_spinner {
+    position: absolute;
+    background-color: var(--tertiary);
+    border-radius: 20px;
+    height: inherit;
+}
+
+.spinner-element__1a {
+    width: 5px;
+    transform: rotate(180deg);
+}
+
+.spinner-element__1b {
+    width: 5px;
+    transform: rotate(90deg);
+}
+
+.spinner-element__1c {
+    width: 5px;
+    transform: rotate(45deg);
+}
+.spinner-element__1d {
+    width: 5px;
+    transform: rotate(135deg);
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
 .prompt-chat__header {
     display: flex;
     justify-content: center;
@@ -726,9 +778,13 @@ header > h1 {
     display: flex;
     align-self: flex-start;
     text-align: center;
-    color: var(--tertiary-75);
+    color: var(--tertiary);
     font-size: 15px;
     margin: 10px 0 20px 0;
+}
+
+.dark-mode .chat-name {
+    color: var(--dm-secondary-75);
 }
 
 @media (max-width: 700px) {
@@ -790,6 +846,7 @@ header > h1 {
     max-width: 80%;
     width: 80%;
     height: 90%;
+    overflow-x: hidden;
     overflow-y: scroll;
     scroll-behavior: smooth;
     scrollbar-width: none;
@@ -815,6 +872,7 @@ header > h1 {
 .message-user {
     align-self: end;
     border-radius: 5px 5px 5px 15px;
+    width: auto;
 }
 
 .message-header {

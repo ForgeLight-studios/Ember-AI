@@ -3,14 +3,15 @@ import Select from 'react-select'
 import Message from "./Message.jsx";
 import {nanoid} from "nanoid";
 import { useParams } from "react-router-dom";
+import Spinner from "./Spinner.jsx";
 
 
 export default function PromptChat({models, isDarkMode, url, handleNotification, currentChat,
                                    setChats, chats, newChat, setCurrentChat, selectedModel,
                                    setSelectedModel, apiCallHelper, modelLifeCycle, viewPort}) {
-
+    const messagesRef = useRef(null);
     const { chatId } = useParams();
-
+    const [sending, setSending] = useState(false);
     useEffect(() => {
         if (!chatId) return;
         const chat = chats.find(c => c.id === chatId);
@@ -54,7 +55,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
     })
 
     useEffect(() => {
-        messageRef.current?.scrollIntoView({behavior: "smooth"});
+        messageRef.current?.scrollIntoView({behavior: "smooth", block: "end"});
         if (viewPort > 700) textAreaRef.current?.focus()
     }, [chats])
 
@@ -124,6 +125,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
 
     async function onSubmit(e) {
         e.preventDefault();
+        setSending(prev => !prev)
         let chat
         if (currentMessage.content === "" || !selectedModel?.name) {
             handleNotification("error", "Please select a model or add a message")
@@ -160,25 +162,33 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                 name: chat.name
             }
         })
+        // Slight delay allows for the response to go into view at the
+        // same time as the spinner disappears
+        setTimeout(() => {
+            setSending(prev => !prev)
+        }, 100)
         if (!didMessageSend) resetMessageOnFail(chat.id)
 
         if (didMessageSend.success) updateChats(chat, didMessageSend.assistantResponse)
     }
 
+    useEffect(() => {
+        messagesRef.current?.scrollIntoView({behavior: "smooth", block: "end"});
+    }, []);
+
+
     return (
         <>
-        {/*<div style={{width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column"}}>*/}
             {(currentChat.name === "New chat" || currentChat.name === "") ? <header className="prompt-chat__header">
                 <h1>Ember AI</h1>
                 <p>Welcome to Ember AI, A simple and locally hosted LLM web-app! Enjoy</p>
             </header> :
-                <section className="prompt-chat__messages">
+                <section ref={messagesRef} className="prompt-chat__messages">
                     {messageList}
                 </section>
             }
 
-
-            <form onSubmit={(e) => onSubmit(e)} className={isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}>
+            <form onSubmit={(e) => onSubmit(e)} className={sending ? "prompt-chat_textarea disabled" : isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}>
                 <textarea className="chat-box"
                           placeholder={"Write a message..."}
                           onFocus={() => setIsTyping( true)}
@@ -199,6 +209,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                           }}
                 ></textarea>
                 <div className={"chat-action-buttons"}>
+                    {sending && <Spinner />}
                     <Select options={modelOptions}
                             isDisabled={messages.length > 0}
                             value={modelOptions.find(o => o.value.name === selectedModel?.name) ?? null}
@@ -250,7 +261,6 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                         <button type={"submit"} className={"general-button success-button"}>Send</button>
                 </div>
             </form>
-            {/*</div>*/}
         </>
     )
 }

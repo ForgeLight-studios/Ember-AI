@@ -70,17 +70,20 @@ export default function Header ({ isOpen, setIsOpen, isDarkMode, chats, currentC
                 {menu}
             </div>
             :
-                <div className={isOpen ? "mobile-menu__open menu" : "menu-mobile"}>
-                    {!isOpen &&<img src={Logo} alt="logo" className={"menu-logo"}
-                          style={{width: "50px", height: "50px", cursor: "pointer", marginTop: "5px"}}
-                                    onClick={() => {
-                                        setIsOpen(prev => !prev);
-                                    }}/>}
-                    <Routes>
-                        <Route path={"/chat/:chatId"} element={<p className={"chat-name"} style={{margin: "18px"}}>{currentChat?.name}</p>}/>
-                    </Routes>
-                    {isOpen && <>{menu}</>}
-                </div>
+                <>
+                    {!isOpen && <div className={"menu-mobile"}>
+                        <img src={Logo} alt="logo" className={"menu-logo"}
+                                         style={{width: "50px", height: "50px", cursor: "pointer", marginTop: "5px"}}
+                                         onClick={() => {
+                                             setIsOpen(prev => !prev);
+                                         }}/>
+                        <Routes>
+                            <Route path={"/chat/:chatId"} element={<p className={"chat-name"}
+                                                                      style={{margin: "18px"}}>{currentChat?.name}</p>}/>
+                        </Routes>
+                    </div>}
+                    {isOpen && <div className={"mobile-menu__open menu" }>{menu}</div>}
+                </>
             }
     </>
     )
