@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {Fragment} from "react"
 
 export default function ContextMenu({menuItems, title, x, y, isDarkMode, apiCallHelper, chats, chat, handleNotification,
                                         activateAreYouSure, setChats, setWhichContextMenu, viewPort}) {
@@ -32,7 +33,7 @@ export default function ContextMenu({menuItems, title, x, y, isDarkMode, apiCall
 
     const menuItemElements = menuItems.map(menuItem => {
         return (
-            <>
+            <Fragment key={menuItem.name}>
                 {menuItem.name === "rename" ?
                     <input className={"context-menu__item"} style={{border: isDarkMode ? "1px solid var(--dm-border-colour)" : "1px var(--border-colour)",
                     backgroundColor: isDarkMode ? "var(--dm--neutral)" : "var(--neutral)", highlight: "none",
@@ -54,7 +55,7 @@ export default function ContextMenu({menuItems, title, x, y, isDarkMode, apiCall
                         {menuItem.name}
                     </p>
                 }
-            </>
+            </Fragment>
         )
     })
     return (

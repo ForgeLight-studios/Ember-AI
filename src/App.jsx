@@ -12,6 +12,13 @@ import {Routes, Route, useNavigate, useLocation} from "react-router-dom";
 export default function App() {
     const navigate = useNavigate();
     const location = useLocation();
+    const [currentPullingModel, setCurrentPullingModel] = useState(null);
+    const [progress, setProgress] = useState({
+        completed: 0,
+        total: 0,
+    });
+    const [status, setStatus] = useState("Starting");
+    const [isModelPulling, setIsModelPulling] = useState(false);
 
     useEffect(() => {
         if (window.location.pathname === "/") {
@@ -105,18 +112,13 @@ export default function App() {
             return resData;
         } catch (e) {
             handleNotification("error", `Internal error occurred: ${e}`);
+            console.log(`${JSON.stringify(e)}`)
             return {
               success: false,
             }
         }
     }
 
-    const [progress, setProgress] = useState({
-        completed: 0,
-        total: 0,
-    });
-    const [status, setStatus] = useState("Starting");
-    const [isModelPulling, setIsModelPulling] = useState(false);
     const [activeView, setActiveView] = useState("Chats");
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [toggleMenuTitle, setToggleMenuTitle] = useState(false)
@@ -138,6 +140,7 @@ export default function App() {
             const modelsRes = await apiCallHelper("model/allmodels", "GET");
             if (modelsRes.success) {
                 setModels(modelsRes.models);
+                setCurrentPullingModel(modelsRes.pulling);
                 if (modelsRes.models?.length) handleNotification("notice", "loaded models");
             }
 
@@ -169,129 +172,141 @@ export default function App() {
         }
     }, [isMenuOpen])
 
-    async function pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription) {
-        e.preventDefault();
+    // async function pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription) {
+    //     e.preventDefault();
+    //
+    //     if (!addModel || !addModelDescription) {
+    //         console.log("Mak sure all fields are entered!!!")
+    //         setStatus("Please make sure all fields are entered!");
+    //         return;
+    //     }
+    //     const model = {
+    //         name: addModel,
+    //         description: addModelDescription,
+    //     }
+    //     const resData = await apiCallHelper("model/create", "POST", null, {name: addModel, description: addModelDescription, status: "pulling"});
+    //     model.status = "pulling"
+    //     setModels((prevModels) => [model, ...prevModels]);
+    //     console.log(JSON.stringify(resData));
+    //     if (!resData.success) {
+    //         handleNotification("error", `could not saveModel to database`);
+    //         return;
+    //     }
+    //
+    //     setIsModelPulling(true);
+    //     setStatus("Starting");
+    //     setAddModelDescription("");
+    //     setAddModel("")
+    //
+    //     try {
+    //         // const response = await apiCallHelper("ollama/pull", "POST", null, {model: addModel})
+    //         const response = await fetch(api_url + "/ollama/pull", {
+    //             method: "POST",
+    //             body: JSON.stringify({
+    //                 model: addModel,
+    //             }),
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             }
+    //         })
+    //         if (!response.ok) {
+    //             setStatus(`Error status code: ${response.status}`);
+    //             setTimeout(() => setIsModelPulling(false), 3000);
+    //             return;
+    //         }
+    //
+    //         const reader = response.body.getReader()
+    //         const decoder = new TextDecoder();
+    //         let buffer = "";
+    //
+    //         while (true) {
+    //             const {done, value} = await reader.read();
+    //             // stops the loop if the stream is done
+    //             if (done) {
+    //                 setStatus("Successfully retrieved!");
+    //                 handleNotification("notify", `Model: ${addModel} has been installed successfully!`);
+    //                 const resData = await apiCallHelper("model/patch", "PATCH", null, {name: addModel, attributeValue: "installed", attribute: "status"});
+    //                 model.status = "installed"
+    //                 setModels((prevModels) =>
+    //                     prevModels.map(m =>
+    //                         m.name === model.name ? { ...m, status: "installed" } : m
+    //                     )
+    //                 );
+    //                 if (!resData.success) {
+    //                     handleNotification("error", `could not saveModel to database`);
+    //                     return;
+    //                 }
+    //                 break;
+    //             }
+    //
+    //             // adds the decoded value to the buffer
+    //             buffer += decoder.decode(value, { stream: true });
+    //             // splits the buffer at newlines so they can be seperated
+    //             const events = buffer.split("\n\n");
+    //             // removes the first item from the event loop and assigns the value to buffer
+    //             buffer = events.pop()
+    //             for (const event of events) {
+    //                 const trimmed = event.trim();
+    //                 if (!trimmed.startsWith("data: ")) continue;
+    //                 // removes the 'data: ' prefix so it can be parsed as json
+    //                 const chunk = JSON.parse(trimmed.slice(6));
+    //
+    //                 if (chunk.error) {
+    //                     setStatus(chunk.error);
+    //                     handleNotification("error", `Pull failed: ${chunk.error}`);
+    //                     await apiCallHelper("model/status", "PATCH", null, { name: addModel, status: "failed" });
+    //                     setModels(prev => prev.map(m => m.name === model.name ? { ...m, status: "failed" } : m));
+    //                     setTimeout(() => setIsModelPulling(false), 3000);
+    //                     return;
+    //                 }
+    //
+    //                 if (chunk.done) {
+    //                     console.log("Added model " + JSON.stringify({
+    //                         name: addModel,
+    //                         description: addModelDescription,
+    //                     }, null, 2));
+    //                     setTimeout(() => {
+    //                         setIsModelPulling(false);
+    //                     }, 3000)
+    //                 }
+    //
+    //                 if (chunk.status) setStatus(chunk.status);
+    //
+    //                 if (chunk.total && chunk.completed) {
+    //                     setProgress({
+    //                         completed: chunk.completed ?? 0,
+    //                         total: chunk.total,
+    //                     })
+    //                 }
+    //             }
+    //         }
+    //     } catch (e) {
+    //         setStatus(e.message)
+    //         setTimeout(() => {
+    //             setIsModelPulling(false);
+    //         }, 3000)
+    //         await apiCallHelper("model/status", "PATCH", null, {name: addModel, status: "failed"});
+    //         model.status = "failed";
+    //         setModels((prevModels) =>
+    //             prevModels.map(m =>
+    //                 m.name === model.name ? { ...m, status: "failed" } : m
+    //             )
+    //         );
+    //         console.log(e.message)
+    //     }
+    // }
 
-        if (!addModel || !addModelDescription) {
-            console.log("Mak sure all fields are entered!!!")
-            setStatus("Please make sure all fields are entered!");
-            return;
-        }
-        const model = {
-            name: addModel,
-            description: addModelDescription,
-        }
-        const resData = await apiCallHelper("model/create", "POST", null, {name: addModel, description: addModelDescription, status: "pulling"});
-        model.status = "pulling"
-        setModels((prevModels) => [model, ...prevModels]);
-        console.log(JSON.stringify(resData));
-        if (!resData.success) {
-            handleNotification("error", `could not saveModel to database`);
-            return;
-        }
-
-        setIsModelPulling(true);
-        setStatus("Starting");
-        setAddModelDescription("");
-        setAddModel("")
-
-        try {
-            // const response = await apiCallHelper("ollama/pull", "POST", null, {model: addModel})
-            const response = await fetch(api_url + "/ollama/pull", {
-                method: "POST",
-                body: JSON.stringify({
-                    model: addModel,
-                }),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
-            if (!response.ok) {
-                setStatus(`Error status code: ${response.status}`);
-                setTimeout(() => setIsModelPulling(false), 3000);
-                return;
-            }
-
-            const reader = response.body.getReader()
-            const decoder = new TextDecoder();
-            let buffer = "";
-
-            while (true) {
-                const {done, value} = await reader.read();
-                // stops the loop if the stream is done
-                if (done) {
-                    setStatus("Successfully retrieved!");
-                    handleNotification("notify", `Model: ${addModel} has been installed successfully!`);
-                    const resData = await apiCallHelper("model/patch", "PATCH", null, {name: addModel, attributeValue: "installed", attribute: "status"});
-                    model.status = "installed"
-                    setModels((prevModels) =>
-                        prevModels.map(m =>
-                            m.name === model.name ? { ...m, status: "installed" } : m
-                        )
-                    );
-                    if (!resData.success) {
-                        handleNotification("error", `could not saveModel to database`);
-                        return;
-                    }
-                    break;
-                }
-
-                // adds the decoded value to the buffer
-                buffer += decoder.decode(value, { stream: true });
-                // splits the buffer at newlines so they can be seperated
-                const events = buffer.split("\n\n");
-                // removes the first item from the event loop and assigns the value to buffer
-                buffer = events.pop()
-                for (const event of events) {
-                    const trimmed = event.trim();
-                    if (!trimmed.startsWith("data: ")) continue;
-                    // removes the 'data: ' prefix so it can be parsed as json
-                    const chunk = JSON.parse(trimmed.slice(6));
-
-                    if (chunk.error) {
-                        setStatus(chunk.error);
-                        handleNotification("error", `Pull failed: ${chunk.error}`);
-                        await apiCallHelper("model/status", "PATCH", null, { name: addModel, status: "failed" });
-                        setModels(prev => prev.map(m => m.name === model.name ? { ...m, status: "failed" } : m));
-                        setTimeout(() => setIsModelPulling(false), 3000);
-                        return;
-                    }
-
-                    if (chunk.done) {
-                        console.log("Added model " + JSON.stringify({
-                            name: addModel,
-                            description: addModelDescription,
-                        }, null, 2));
-                        setTimeout(() => {
-                            setIsModelPulling(false);
-                        }, 3000)
-                    }
-
-                    if (chunk.status) setStatus(chunk.status);
-
-                    if (chunk.total && chunk.completed) {
-                        setProgress({
-                            completed: chunk.completed ?? 0,
-                            total: chunk.total,
-                        })
-                    }
-                }
-            }
-        } catch (e) {
-            setStatus(e.message)
-            setTimeout(() => {
-                setIsModelPulling(false);
-            }, 3000)
-            await apiCallHelper("model/status", "PATCH", null, {name: addModel, status: "failed"});
-            model.status = "failed";
-            setModels((prevModels) =>
-                prevModels.map(m =>
-                    m.name === model.name ? { ...m, status: "failed" } : m
-                )
-            );
-            console.log(e.message)
-        }
-    }
+    // async function pullModel () {
+    //     await apiCallHelper("ollama/pull", "POST", null, { model: addModel });   // start
+    //     const es = new EventSource(`${api_url}/ollama/pull/progress/${encodeURIComponent(addModel)}`);
+    //     es.onmessage = (ev) => {
+    //         const s = JSON.parse(ev.data);
+    //         if (s.error) { /* mark failed */ es.close(); return; }
+    //         if (s.total && s.completed) setProgress({ completed: s.completed, total: s.total });
+    //         setStatus(s.status);
+    //         if (s.state === "done") { /* mark installed */ es.close(); }
+    //     };
+    // }
 
     useEffect(() => {
         const savedTheme = JSON.parse(localStorage.getItem("theme"));
@@ -364,10 +379,13 @@ export default function App() {
                         />
                         <Route path="/models" element={
                             <Models models={models} setModels={setModels} setAreYouSureFunction={setAreYouSureFunction}
-                                                               api_url={api_url} pullModel={pullModel} setAreYouSureMessage={setAreYouSureMessage}
-                                                               status={status} progress={progress} handleNotification={handleNotification}
-                                                               isModelPulling={isModelPulling} apiCallHelper={apiCallHelper} activateAreYouSure={activateAreYouSure}
-                                                               setIsAreYouSure={setIsAreYouSure}/>}
+                                                               api_url={api_url} setAreYouSureMessage={setAreYouSureMessage}
+                                                               handleNotification={handleNotification}
+                                                               apiCallHelper={apiCallHelper} activateAreYouSure={activateAreYouSure}
+                                                               setIsAreYouSure={setIsAreYouSure} progress={progress} setProgress={setProgress}
+                                                               status={status} setStatus={setStatus} currentPullingModel={currentPullingModel}
+                                                               setCurrentPullingModel={setCurrentPullingModel} isModelPulling={isModelPulling}
+                                                               setIsModelPulling={setIsModelPulling}/>}
                         />
                         <Route path={"/settings"} element={
                             <Settings setIsDarkMode={setIsDarkMode} setModelLifeCycle={setModelLifeCycle} isDarkMode={isDarkMode} modelLifeCycle={modelLifeCycle}/>}

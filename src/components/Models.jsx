@@ -1,19 +1,83 @@
 import {useEffect, useState} from "react";
 import ModelList from "./ModelList.jsx";
 
-export default function Models({models, status, progress, pullModel, isModelPulling, apiCallHelper,
+export default function Models({models, apiCallHelper, progress, setProgress, status, setStatus, isModelPulling,
+                                   setIsModelPulling, currentPullingModel, setCurrentPullingModel,
                                    setModels, handleNotification, setAreYouSureFunction, setAreYouSureMessage,
-                                   setIsAreYouSure, activateAreYouSure}) {
+                                   setIsAreYouSure, activateAreYouSure, api_url}) {
 
 
     const [addModel, setAddModel] = useState("");
     const [addModelDescription, setAddModelDescription] = useState("");
     const [editModels, setEditModels] = useState(false);
 
+
     useEffect(() => {
         console.log(JSON.stringify("STATUS: " + status));
         console.log("PROGRESS: " + JSON.stringify(progress));
     }, [status, progress])
+
+    function modelExists(model) {
+        if (models.some(m => m.name === model)) {
+            if (isModelPulling) {
+                return true;
+            }
+            handleNotification("error", "Model already exists");
+            return true
+        }
+        return false
+    }
+
+    function getActivePulling(model) {
+        setIsModelPulling(true);
+        // set, don't toggle
+        const es = new EventSource(`${api_url}/ollama/pull/progress/${encodeURIComponent(model)}`);
+        es.onmessage = (ev) => {
+            const s = JSON.parse(ev.data);
+            if (s.error) { es.close(); setIsModelPulling(false); return; }
+            if (s.total && s.completed) setProgress({ completed: s.completed, total: s.total });
+            setStatus(s.status);
+
+            if (s.state === "done") {
+                es.close();
+                setIsModelPulling(false);
+            }
+        };
+        es.onerror = () => { es.close(); setIsModelPulling(false); };
+        return () => {
+            setModels(models.map((m) => {
+                es?.close()
+                if (m.name !== model) {
+                    return m;
+                }
+                return {...m, status: "installed"};
+            }))
+        }
+    }
+
+    async function pullModel(e) {
+        if (e) e.preventDefault();
+        const model = addModel  // capture before anything clears it
+        if (modelExists(model)) return;
+        if (!model) return;
+        await apiCallHelper("ollama/pull", "POST", null, { model });
+        getActivePulling(model)
+    }
+
+    useEffect(() => {
+        if (!currentPullingModel) return
+        async function getPulling() {
+            if (modelExists(currentPullingModel)) return;
+            setModels((prevModels) => [{
+                name: currentPullingModel, status: "pulling",
+            }, ...prevModels]);
+            getActivePulling(currentPullingModel);   // this opens the EventSource — that's all you need
+        }
+        if (!isModelPulling) {
+            if (modelExists(currentPullingModel)) return;
+        }
+        getPulling()
+    }, [models.length]);
 
     return (
         <div className="page-container">

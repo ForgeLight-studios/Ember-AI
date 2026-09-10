@@ -24,9 +24,13 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat,
     }, [whichContextMenu]);
 
     async function deleteChat (chat) {
-        if (!chat || chat.name === "New chat") {
+        if (!chat) {
             setWhichContextMenu("")
             handleNotification("error", "This chat does not exist")
+            return
+        }
+        if (chat.name === "New chat") {
+            setChats(prev => prev.filter(c => c.name !== chat.name))
             return
         }
         activateAreYouSure(`delete ${chat.name}`, () => async() => {
@@ -47,12 +51,12 @@ export default function ChatList ({chats, currentChat, newChat, setCurrentChat,
 
     const chatList = chats.map((chat) => {
         return(
-                <div className={""}>
+                <div className={""} key={chat?.id ? chat.id : chat.name}>
                         {whichContextMenu === chat.id &&<ContextMenu setChats={setChats} handleNotification={handleNotification} activateAreYouSure={activateAreYouSure}
                                                                      chat={chat} x={menuPos.x} y={menuPos.y} isDarkMode={isDarkMode} setWhichContextMenu={setWhichContextMenu}
                                                                      menuItems={[{name: "Delete", func: () => deleteChat(chat)}, {name: "rename", func: null}]}
                                                                      title={"Chat Menu"} apiCallHelper={apiCallHelper} chats={chats} viewPort={viewPort}/>}
-                    <p className={currentChat ? currentChat.id === chat.id ? "active-chat" : "chat" : "chat"} key={chat.id} onClick={() => {
+                    <p className={currentChat ? currentChat.id === chat.id ? "active-chat" : "chat" : "chat"} onClick={() => {
                         const newCurrentChat = chats.find(c => c.id === chat.id)
                         setCurrentChat(newCurrentChat);
                         navigate(`/chat/${chat.id}`);

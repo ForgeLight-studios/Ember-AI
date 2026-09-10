@@ -11,7 +11,7 @@ export default function ModelList({models, apiCallHelper, setModels, handleNotif
 
     const modelList = models.map((model) => {
         return (
-            <div className="model-list__wrapper">
+            <div className="model-list__wrapper" key={model.name}>
                 <div className={"model-list__item"}>
                     <div className={"model-list__item-header"}>
                         <p className={"model-list__name"}>{model.name}</p>

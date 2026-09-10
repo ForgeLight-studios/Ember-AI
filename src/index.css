@@ -897,9 +897,13 @@ header > h1 {
 
 .failedMessage {
     text-align: right;
-    color: var(--secondary);
+    color: var(--danger) !important;
     font-size: 12px;
     margin: 3px 0 0 0;
+}
+
+.darkMode .failedMessage {
+    color: var(--danger) !important;
 }
 /*----------------- models -----------------------*/
 
@@ -927,6 +931,7 @@ header > h1 {
     padding: 10px;
     margin-top: 10px;
     border-radius: 15px;
+    width: calc(100% - 20px);
 }
 
 .model-status-on > .model-status_text {
@@ -934,6 +939,7 @@ header > h1 {
     background-color: var(--tertiary-75);
     padding: 10px;
     font-size: 15px;
+    margin: 0;
 }
 
 .model-status_header {
@@ -941,6 +947,7 @@ header > h1 {
     font-weight: bold;
     padding-left: 10px;
     color: var(--secondary);
+    margin: 0;
 }
 
 .progress-bar {
