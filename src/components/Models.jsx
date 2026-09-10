@@ -45,6 +45,7 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
         };
         es.onerror = () => { es.close(); setIsModelPulling(false); };
         return () => {
+            setCurrentPullingModel(null)
             setModels(models.map((m) => {
                 es?.close()
                 if (m.name !== model) {
@@ -57,24 +58,24 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
 
     async function pullModel(e) {
         if (e) e.preventDefault();
-        const model = addModel  // capture before anything clears it
-        if (modelExists(model)) return;
+        const model = {name: addModel, description: addModelDescription}
+        if (modelExists(model?.name)) return;
         if (!model) return;
-        await apiCallHelper("ollama/pull", "POST", null, { model });
-        getActivePulling(model)
+        await apiCallHelper("ollama/pull", "POST", null, { name: model.name, description: model.description });
+        getActivePulling(model?.name)
     }
 
     useEffect(() => {
         if (!currentPullingModel) return
         async function getPulling() {
-            if (modelExists(currentPullingModel)) return;
+            if (modelExists(currentPullingModel.name)) return;
             setModels((prevModels) => [{
-                name: currentPullingModel, status: "pulling",
+                name: currentPullingModel.name, description: currentPullingModel.description, status: "pulling",
             }, ...prevModels]);
-            getActivePulling(currentPullingModel);   // this opens the EventSource — that's all you need
+            getActivePulling(currentPullingModel.name);   // this opens the EventSource — that's all you need
         }
         if (!isModelPulling) {
-            if (modelExists(currentPullingModel)) return;
+            if (modelExists(currentPullingModel.name)) return;
         }
         getPulling()
     }, [models.length]);
