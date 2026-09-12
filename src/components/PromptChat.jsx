@@ -18,6 +18,8 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         if (chat) setCurrentChat(chat);
     }, [chatId, chats, setCurrentChat]);
 
+    const modelExists = models.some(m => m.name === currentChat.model);
+
     const messages = chats.find(c => c && c.id === currentChat?.id)?.messages ?? [];
 
     useEffect(() => {
@@ -65,7 +67,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         const isFirst = index === 0
         return (
             <Message failed={message?.failed} text={message.content} key={message.id} user={message.role} latestMessageRef={messageRef}
-                     isLast={isLast} assistant={selectedModel.name} isFirst={isFirst}/>
+                     isLast={isLast} assistant={selectedModel?.name + ""} isFirst={isFirst}/>
         )
     })
 
@@ -188,12 +190,12 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                 </section>
             }
 
-            <form onSubmit={(e) => onSubmit(e)} className={sending ? "prompt-chat_textarea disabled" : isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}>
+            <form onSubmit={(e) => onSubmit(e)} className={sending || (!modelExists && currentChat.model) ? "prompt-chat_textarea disabled" : isTyping ? "prompt-chat_textarea prompt-chat_textarea__focus" : "prompt-chat_textarea"}>
                 <textarea className="chat-box"
                           placeholder={"Write a message..."}
                           onFocus={() => setIsTyping( true)}
                           onBlur={() => setIsTyping(false)}
-                          value={currentMessage.content}
+                          value={!modelExists && currentChat.model ? `"The model for this chat has been deleted, Install ${currentChat.model} to use it again"` : currentMessage.content}
                           ref={textAreaRef}
                           onKeyDown={(e) => {
                               if (e.key === "Enter" && !e.shiftKey) {
@@ -207,6 +209,7 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                                   content: e.target.value,
                               }))
                           }}
+                          style={{color: (!modelExists && currentChat.model) ? "var(--danger)" : ""}}
                 ></textarea>
                 <div className={"chat-action-buttons"}>
                     {sending && <Spinner />}
