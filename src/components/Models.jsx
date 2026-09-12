@@ -11,6 +11,10 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
     const [addModelDescription, setAddModelDescription] = useState("");
     const [editModels, setEditModels] = useState(false);
 
+    function resetFormItems() {
+        setAddModelDescription("");
+        setAddModel("");
+    }
 
     useEffect(() => {
         console.log(JSON.stringify("STATUS: " + status));
@@ -61,6 +65,7 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
         const model = {name: addModel, description: addModelDescription}
         if (modelExists(model?.name)) return;
         if (!model) return;
+        resetFormItems()
         await apiCallHelper("ollama/pull", "POST", null, { name: model.name, description: model.description });
         getActivePulling(model?.name)
     }
@@ -86,7 +91,7 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
                 <h1>Models</h1>
                 <p>The models available to use are currently only ollama free models</p>
             </div>
-            <form onSubmit={(e) => pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription)}>
+            <form onSubmit={(e) => pullModel(e, setAddModelDescription, setAddModel, addModel, addModelDescription)} className={isModelPulling && "disabled"}>
                 <h2>Add models</h2>
                     <div className="form-text__input-field">
                         <label>Model name</label>
