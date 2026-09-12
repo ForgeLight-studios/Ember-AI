@@ -133,10 +133,6 @@ export default function App() {
         didLoad.current = true;
 
         async function init() {
-            // 1. sync Ollama's installed models into the DB first
-            await apiCallHelper("ollama/checkInstalled", "GET");
-
-            // 2. then load models and chats from the DB
             const modelsRes = await apiCallHelper("model/allmodels", "GET");
             if (modelsRes.success) {
                 setModels(modelsRes.models);
