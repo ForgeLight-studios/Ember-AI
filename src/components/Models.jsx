@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import ModelList from "./ModelList.jsx";
+import {nanoid} from "nanoid";
 
 export default function Models({models, apiCallHelper, progress, setProgress, status, setStatus, isModelPulling,
                                    setIsModelPulling, currentPullingModel, setCurrentPullingModel,
@@ -31,6 +32,9 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
         }
         return false
     }
+    useEffect(() => {
+        console.log(JSON.stringify(models, null, 2));
+    }, [models])
 
     function getActivePulling(model) {
         setIsModelPulling(true);
@@ -45,18 +49,16 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
             if (s.state === "done") {
                 es.close();
                 setIsModelPulling(false);
+                console.log(`Setting the new model status to installed: ${model}`);
+                setModels(prev => prev.map((m) =>
+                    m.name === model ? { ...m, status: "installed" } : m
+                ));
             }
         };
         es.onerror = () => { es.close(); setIsModelPulling(false); };
         return () => {
             setCurrentPullingModel(null)
-            setModels(models.map((m) => {
-                es?.close()
-                if (m.name !== model) {
-                    return m;
-                }
-                return {...m, status: "installed"};
-            }))
+            es?.close();
         }
     }
 
@@ -65,6 +67,8 @@ export default function Models({models, apiCallHelper, progress, setProgress, st
         const model = {name: addModel, description: addModelDescription}
         if (modelExists(model?.name)) return;
         if (!model) return;
+        //adds a temporary model to show the status of a pulling model
+        setModels(prev => [{name: addModel, description: addModelDescription, status:"pulling"}, ...prev]);
         resetFormItems()
         await apiCallHelper("ollama/pull", "POST", null, { name: model.name, description: model.description });
         getActivePulling(model?.name)
