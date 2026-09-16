@@ -87,6 +87,10 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         setCurrentMessage({content: "", role: "user", id: nanoid()})
     }
 
+    useEffect(() => {
+        console.log(`changing the value of sending to: ${sending}`);
+    }, [sending])
+
     async function sendMessage(chat, newMessage) {
         console.log("Sending message...")
         try {
@@ -109,9 +113,16 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
             const assistantResponse = {content: resData.reply, role: "assistant", id: nanoid(), assistant: selectedModel.name, chat_id: chat.id}
             try{
                 const userMessageRes = await apiCallHelper("chats/createMessage", "POST", null, newMessage);
-                if (!userMessageRes.success) return {success: false}
+                if (!userMessageRes.success) {
+                    // setSending(prev => !prev)
+                    return {success: false}
+                }
                 const assistantMessageRes = await apiCallHelper("chats/createMessage", "POST", null, assistantResponse);
-                if (!assistantMessageRes.success) return {success: false}
+                if (!assistantMessageRes.success) {
+                    // setSending(prev => !prev)
+                    return {success: false}
+                }
+                // setSending(prev => !prev)
                 return {
                     assistantResponse: assistantResponse,
                     success: true
@@ -122,12 +133,16 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         } catch (e) {
             console.error(JSON.stringify(e.message))
             return false
+        } finally {
+            // setTimeout(() => {
+            //     setSending(prev => !prev)
+            //     setCurrentMessage({content: "", role: "user", id: nanoid()})
+            // }, 1000)
         }
     }
 
     async function onSubmit(e) {
         e.preventDefault();
-        setSending(prev => !prev)
         let chat
         if (currentMessage.content === "" || !selectedModel?.name) {
             handleNotification("error", "Please select a model or add a message")
@@ -141,18 +156,18 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
         } else {
             chat = currentChat
         }
+        setSending(prev => !prev)
+
 
         if (messages.length === 0) {
-            try {
-                const response = await apiCallHelper("chats/createChat",
-                    "POST", null, {id: chat.id, title: chat.name, model: chat.model})
-                if (!response.success) {
-                    return false
-                }
-            } catch(e) {
-                console.log(JSON.stringify(e, null, 2));
-                handleNotification("error", "Could not store the new chat");
-                return;
+            const response = await apiCallHelper("chats/createChat",
+                "POST", null, {id: chat.id, title: chat.name, model: chat.model})
+            if (!response.success) {
+                setTimeout(() => {
+                    setSending(prev => !prev)
+                    setCurrentMessage({content: "", role: "user", id: nanoid()})
+                }, 1000)
+                return false
             }
         }
 
@@ -164,14 +179,13 @@ export default function PromptChat({models, isDarkMode, url, handleNotification,
                 name: chat.name
             }
         })
-        // Slight delay allows for the response to go into view at the
-        // same time as the spinner disappears
-        setTimeout(() => {
-            setSending(prev => !prev)
-        }, 100)
         if (!didMessageSend) resetMessageOnFail(chat.id)
 
         if (didMessageSend.success) updateChats(chat, didMessageSend.assistantResponse)
+        setTimeout(() => {
+            setSending(prev => !prev)
+            setCurrentMessage({content: "", role: "user", id: nanoid()})
+        }, 1)
     }
 
     useEffect(() => {

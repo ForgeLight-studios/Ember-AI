@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
 import ModelList from "./ModelList.jsx";
-import {nanoid} from "nanoid";
 
 export default function Models({models, apiCallHelper, progress, setProgress, status, setStatus, isModelPulling,
                                    setIsModelPulling, currentPullingModel, setCurrentPullingModel,
